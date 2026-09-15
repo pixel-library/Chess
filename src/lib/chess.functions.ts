@@ -172,17 +172,25 @@ export const createGame = createServerFn({ method: "POST" })
         })
         .select("id, code")
         .maybeSingle();
-      if (error) continue;
+      if (error) {
+        console.error("[createGame] insert error:", error);
+        if (error.code === "23505") continue; // Unique constraint violation (duplicate code), retry
+        throw new Error(`Failed to create room: ${error.message}`);
+      }
       if (!game) continue;
-      await db.from("game_tokens").insert({
+      const { error: tokenError } = await db.from("game_tokens").insert({
         game_id: game.id,
         color,
         token,
         session_id: data.sessionId,
       });
+      if (tokenError) {
+        console.error("[createGame] token error:", tokenError);
+        throw new Error(`Failed to save room token: ${tokenError.message}`);
+      }
       return { code: game.code, color, token };
     }
-    throw new Error("Could not create a room, please try again");
+    throw new Error("Could not create a room code, please try again");
   });
 
 export const joinGame = createServerFn({ method: "POST" })
