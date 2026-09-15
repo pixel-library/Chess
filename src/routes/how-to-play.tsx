@@ -14,7 +14,10 @@ export const Route = createFileRoute("/how-to-play")({
           "A visual walkthrough of Chess Room: create a room, share the code, move pieces, read the clock and finish the game.",
       },
       { property: "og:title", content: "How to Play — Chess Room" },
-      { property: "og:description", content: "Rooms, codes, clocks and moves — explained step by step with diagrams." },
+      {
+        property: "og:description",
+        content: "Rooms, codes, clocks and moves — explained step by step with diagrams.",
+      },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -97,7 +100,7 @@ const FAQ = [
   },
   {
     q: "Can someone watch my game?",
-    a: "Yes, if you leave the room listed. Spectators find it on the Watch page and see moves live.",
+    a: "Yes, by sharing your room link or room code with a friend.",
   },
   {
     q: "What if my opponent disappears?",
@@ -117,7 +120,8 @@ function HowToPlay() {
         <p className="eyebrow text-muted-foreground">Guide</p>
         <h1 className="display-xl mt-3 text-[clamp(2rem,5vw,3rem)]">How to play here</h1>
         <p className="mt-4 max-w-2xl text-muted-foreground">
-          Four steps to your first game, then a short visual tour of the board. Brand new to chess? The{" "}
+          Four steps to your first game, then a short visual tour of the board. Brand new to chess?
+          The{" "}
           <Link to="/rules" className="underline decoration-accent underline-offset-4">
             rules page
           </Link>{" "}
@@ -138,7 +142,10 @@ function HowToPlay() {
           <h2 className="font-display text-2xl font-bold">A tour of the board</h2>
           <div className="mt-6 space-y-6">
             {BOARD_LESSONS.map((lesson) => (
-              <article key={lesson.title} className="paper grid items-center gap-8 p-6 md:grid-cols-2">
+              <article
+                key={lesson.title}
+                className="paper grid items-center gap-8 p-6 md:grid-cols-2"
+              >
                 <div>
                   <h3 className="font-display text-xl font-bold">{lesson.title}</h3>
                   <p className="mt-3 text-sm text-muted-foreground">{lesson.text}</p>

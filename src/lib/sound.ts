@@ -3,7 +3,9 @@ let ctx: AudioContext | null = null;
 export function playMoveSound(volume: number) {
   if (typeof window === "undefined") return;
   try {
-    const AudioCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const AudioCtor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioCtor) return;
     ctx = ctx ?? new AudioCtor();
     if (ctx.state === "suspended") void ctx.resume();

@@ -14,7 +14,6 @@ import { Route as ComputerRouteImport } from './routes/computer'
 import { Route as HowToPlayRouteImport } from './routes/how-to-play'
 import { Route as PlayRouteImport } from './routes/play'
 import { Route as RulesRouteImport } from './routes/rules'
-import { Route as WatchRouteImport } from './routes/watch'
 import { Route as GameCodeRouteImport } from './routes/game.$code'
 
 const IndexRoute = IndexRouteImport.update({
@@ -42,11 +41,6 @@ const RulesRoute = RulesRouteImport.update({
   path: '/rules',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WatchRoute = WatchRouteImport.update({
-  id: '/watch',
-  path: '/watch',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const GameCodeRoute = GameCodeRouteImport.update({
   id: '/game/$code',
   path: '/game/$code',
@@ -59,7 +53,6 @@ export interface FileRoutesByFullPath {
   '/how-to-play': typeof HowToPlayRoute
   '/play': typeof PlayRoute
   '/rules': typeof RulesRoute
-  '/watch': typeof WatchRoute
   '/game/$code': typeof GameCodeRoute
 }
 export interface FileRoutesByTo {
@@ -68,7 +61,6 @@ export interface FileRoutesByTo {
   '/how-to-play': typeof HowToPlayRoute
   '/play': typeof PlayRoute
   '/rules': typeof RulesRoute
-  '/watch': typeof WatchRoute
   '/game/$code': typeof GameCodeRoute
 }
 export interface FileRoutesById {
@@ -78,28 +70,14 @@ export interface FileRoutesById {
   '/how-to-play': typeof HowToPlayRoute
   '/play': typeof PlayRoute
   '/rules': typeof RulesRoute
-  '/watch': typeof WatchRoute
   '/game/$code': typeof GameCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/computer'
-    | '/how-to-play'
-    | '/play'
-    | '/rules'
-    | '/watch'
-    | '/game/$code'
+    '/' | '/computer' | '/how-to-play' | '/play' | '/rules' | '/game/$code'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/computer'
-    | '/how-to-play'
-    | '/play'
-    | '/rules'
-    | '/watch'
-    | '/game/$code'
+  to: '/' | '/computer' | '/how-to-play' | '/play' | '/rules' | '/game/$code'
   id:
     | '__root__'
     | '/'
@@ -107,7 +85,6 @@ export interface FileRouteTypes {
     | '/how-to-play'
     | '/play'
     | '/rules'
-    | '/watch'
     | '/game/$code'
   fileRoutesById: FileRoutesById
 }
@@ -117,7 +94,6 @@ export interface RootRouteChildren {
   HowToPlayRoute: typeof HowToPlayRoute
   PlayRoute: typeof PlayRoute
   RulesRoute: typeof RulesRoute
-  WatchRoute: typeof WatchRoute
   GameCodeRoute: typeof GameCodeRoute
 }
 
@@ -158,13 +134,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RulesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/watch': {
-      id: '/watch'
-      path: '/watch'
-      fullPath: '/watch'
-      preLoaderRoute: typeof WatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/game/$code': {
       id: '/game/$code'
       path: '/game/$code'
@@ -181,7 +150,6 @@ const rootRouteChildren: RootRouteChildren = {
   HowToPlayRoute: HowToPlayRoute,
   PlayRoute: PlayRoute,
   RulesRoute: RulesRoute,
-  WatchRoute: WatchRoute,
   GameCodeRoute: GameCodeRoute,
 }
 export const routeTree = rootRouteImport

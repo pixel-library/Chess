@@ -16,7 +16,8 @@ export const Route = createFileRoute("/rules")({
       { property: "og:title", content: "Rules of Chess — Chess Room" },
       {
         property: "og:description",
-        content: "Every rule of chess explained with clear board diagrams — pieces, castling, en passant, draws.",
+        content:
+          "Every rule of chess explained with clear board diagrams — pieces, castling, en passant, draws.",
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -43,10 +44,33 @@ const PIECES = [
     fen: "8/8/8/8/3Q4/8/8/8",
     highlight: ["d4"],
     moves: [
-      "d5", "d6", "d7", "d8", "d3", "d2", "d1",
-      "a4", "b4", "c4", "e4", "f4", "g4", "h4",
-      "c5", "b6", "a7", "e5", "f6", "g7", "h8",
-      "c3", "b2", "a1", "e3", "f2", "g1",
+      "d5",
+      "d6",
+      "d7",
+      "d8",
+      "d3",
+      "d2",
+      "d1",
+      "a4",
+      "b4",
+      "c4",
+      "e4",
+      "f4",
+      "g4",
+      "h4",
+      "c5",
+      "b6",
+      "a7",
+      "e5",
+      "f6",
+      "g7",
+      "h8",
+      "c3",
+      "b2",
+      "a1",
+      "e3",
+      "f2",
+      "g1",
     ],
   },
   {
@@ -122,7 +146,8 @@ const ENDINGS = [
     text: "The king is attacked and there is no legal way out: no escape square, no block, no capture of the attacker.",
     fen: "R5k1/5ppp/8/8/8/8/8/6K1",
     highlight: ["a8", "g8"],
-    caption: "Back-rank mate: the rook checks along the eighth rank and the pawns block the king's escape.",
+    caption:
+      "Back-rank mate: the rook checks along the eighth rank and the pawns block the king's escape.",
   },
   {
     title: "Stalemate — the game is drawn",
@@ -149,8 +174,8 @@ function RulesPage() {
         <p className="eyebrow text-muted-foreground">Reference</p>
         <h1 className="display-xl mt-3 text-[clamp(2rem,5vw,3rem)]">The rules of chess</h1>
         <p className="mt-4 max-w-2xl text-muted-foreground">
-          Everything you need to sit down and play a correct game, with a diagram for each rule. Green dots are
-          squares a piece can move to, red rings are captures.
+          Everything you need to sit down and play a correct game, with a diagram for each rule.
+          Green dots are squares a piece can move to, red rings are captures.
         </p>
 
         <section className="mt-12">
@@ -164,8 +189,8 @@ function RulesPage() {
               <li>A light square sits in each player's bottom-right corner.</li>
               <li>Pawns fill the second row in front of the pieces.</li>
               <li>
-                Back row, corner inwards: rook, knight, bishop, then queen and king — the queen always starts on
-                her own colour.
+                Back row, corner inwards: rook, knight, bishop, then queen and king — the queen
+                always starts on her own colour.
               </li>
               <li>White moves first, then players alternate. Every turn is one move.</li>
             </ul>
@@ -202,7 +227,10 @@ function RulesPage() {
           <h2 className="font-display text-2xl font-bold">Three special moves</h2>
           <div className="mt-6 space-y-6">
             {SPECIAL.map((item) => (
-              <article key={item.title} className="paper grid items-center gap-8 p-6 md:grid-cols-2">
+              <article
+                key={item.title}
+                className="paper grid items-center gap-8 p-6 md:grid-cols-2"
+              >
                 <div>
                   <h3 className="font-display text-xl font-bold">{item.title}</h3>
                   <p className="mt-3 text-sm text-muted-foreground">{item.text}</p>
@@ -222,8 +250,9 @@ function RulesPage() {
         <section className="mt-16">
           <h2 className="font-display text-2xl font-bold">Check, checkmate and stalemate</h2>
           <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-            When your king is attacked you are in check and must answer it immediately — move the king, block the
-            line, or capture the attacker. You may never leave your own king in check.
+            When your king is attacked you are in check and must answer it immediately — move the
+            king, block the line, or capture the attacker. You may never leave your own king in
+            check.
           </p>
           <div className="mt-6 grid gap-6 md:grid-cols-2">
             {ENDINGS.map((item) => (
@@ -259,7 +288,9 @@ function RulesPage() {
               caption="Files are letters a–h, rows are numbers 1–8, so these squares are e4 and f3."
             />
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li>A move is written as the piece letter plus the square: Nf3, Bb5, e4 for a pawn.</li>
+              <li>
+                A move is written as the piece letter plus the square: Nf3, Bb5, e4 for a pawn.
+              </li>
               <li>An x means a capture (Nxe5), + means check, # means checkmate.</li>
               <li>Castling is written 0-0 short or 0-0-0 long.</li>
               <li>Every game here can be exported in this notation as a PGN file.</li>

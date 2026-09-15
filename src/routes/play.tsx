@@ -29,7 +29,8 @@ export const Route = createFileRoute("/play")({
       { title: "Play Online — Chess Room" },
       {
         name: "description",
-        content: "Enter a name, create a private room or join with a code, and play real-time chess instantly.",
+        content:
+          "Enter a name, create a private room or join with a code, and play real-time chess instantly.",
       },
       { property: "og:title", content: "Play Online — Chess Room" },
       { property: "og:description", content: "Private rooms or join by code. No account needed." },
@@ -101,7 +102,6 @@ function PlayPage() {
     }
   }
 
-
   if (!nameLocked) {
     return (
       <div className="min-h-screen bg-background">
@@ -161,101 +161,101 @@ function PlayPage() {
         </div>
 
         <Tabs defaultValue="create" className="mt-8">
-            <TabsList>
-              <TabsTrigger value="create">Create room</TabsTrigger>
-              <TabsTrigger value="join">Join with code</TabsTrigger>
-            </TabsList>
+          <TabsList>
+            <TabsTrigger value="create">Create room</TabsTrigger>
+            <TabsTrigger value="join">Join with code</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="create" className="paper mt-4 p-6">
-              <TimeControlPicker
-                minutes={minutes}
-                increment={increment}
-                onPick={(m, i) => {
-                  setMinutes(m);
-                  setIncrement(i);
-                }}
+          <TabsContent value="create" className="paper mt-4 p-6">
+            <TimeControlPicker
+              minutes={minutes}
+              increment={increment}
+              onPick={(m, i) => {
+                setMinutes(m);
+                setIncrement(i);
+              }}
+            />
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div>
+                <p className="eyebrow text-muted-foreground">Custom</p>
+                <div className="mt-2 flex gap-2">
+                  <Input
+                    type="number"
+                    min={1}
+                    max={180}
+                    value={minutes}
+                    onChange={(event) => setMinutes(Number(event.target.value) || 1)}
+                    aria-label="Minutes"
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    max={60}
+                    value={increment}
+                    onChange={(event) => setIncrement(Number(event.target.value) || 0)}
+                    aria-label="Increment seconds"
+                  />
+                </div>
+              </div>
+              <div>
+                <p className="eyebrow text-muted-foreground">Your colour</p>
+                <div className="mt-2 flex gap-2">
+                  {(["white", "black", "random"] as const).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setColorPref(option)}
+                      className={cn(
+                        "flex-1 rounded-lg border px-3 py-2 text-sm capitalize transition-colors",
+                        colorPref === option
+                          ? "border-accent bg-accent text-accent-foreground"
+                          : "border-border hover:bg-secondary",
+                      )}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap gap-6">
+                <div className="flex items-center gap-3">
+                  <Switch id="create-rated" checked={rated} onCheckedChange={setRated} />
+                  <Label htmlFor="create-rated">Rated (session only)</Label>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Switch id="create-public" checked={isPublic} onCheckedChange={setIsPublic} />
+                  <Label htmlFor="create-public">Listed for spectators</Label>
+                </div>
+              </div>
+              <Button size="lg" disabled={busy} onClick={handleCreate}>
+                Create room
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="join" className="paper mt-4 p-6">
+            <Label htmlFor="join-code">Room code</Label>
+            <div className="mt-2 flex gap-2">
+              <Input
+                id="join-code"
+                value={joinCode}
+                maxLength={8}
+                placeholder="A7K9P2"
+                className="font-display text-lg uppercase tracking-[0.3em]"
+                onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
               />
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <p className="eyebrow text-muted-foreground">Custom</p>
-                  <div className="mt-2 flex gap-2">
-                    <Input
-                      type="number"
-                      min={1}
-                      max={180}
-                      value={minutes}
-                      onChange={(event) => setMinutes(Number(event.target.value) || 1)}
-                      aria-label="Minutes"
-                    />
-                    <Input
-                      type="number"
-                      min={0}
-                      max={60}
-                      value={increment}
-                      onChange={(event) => setIncrement(Number(event.target.value) || 0)}
-                      aria-label="Increment seconds"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <p className="eyebrow text-muted-foreground">Your colour</p>
-                  <div className="mt-2 flex gap-2">
-                    {(["white", "black", "random"] as const).map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setColorPref(option)}
-                        className={cn(
-                          "flex-1 rounded-lg border px-3 py-2 text-sm capitalize transition-colors",
-                          colorPref === option
-                            ? "border-accent bg-accent text-accent-foreground"
-                            : "border-border hover:bg-secondary",
-                        )}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-wrap gap-6">
-                  <div className="flex items-center gap-3">
-                    <Switch id="create-rated" checked={rated} onCheckedChange={setRated} />
-                    <Label htmlFor="create-rated">Rated (session only)</Label>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Switch id="create-public" checked={isPublic} onCheckedChange={setIsPublic} />
-                    <Label htmlFor="create-public">Listed for spectators</Label>
-                  </div>
-                </div>
-                <Button size="lg" disabled={busy} onClick={handleCreate}>
-                  Create room
-                </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="join" className="paper mt-4 p-6">
-              <Label htmlFor="join-code">Room code</Label>
-              <div className="mt-2 flex gap-2">
-                <Input
-                  id="join-code"
-                  value={joinCode}
-                  maxLength={8}
-                  placeholder="A7K9P2"
-                  className="font-display text-lg uppercase tracking-[0.3em]"
-                  onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
-                />
-                <Button disabled={busy || joinCode.trim().length < 4} onClick={handleJoin}>
-                  Join
-                </Button>
-              </div>
-              <p className="mt-3 text-xs text-muted-foreground">
-                An invite link works too — open it and you will be seated automatically.
-              </p>
-            </TabsContent>
+              <Button disabled={busy || joinCode.trim().length < 4} onClick={handleJoin}>
+                Join
+              </Button>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              An invite link works too — open it and you will be seated automatically.
+            </p>
+          </TabsContent>
         </Tabs>
 
         {recent.length > 0 && (

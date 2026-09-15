@@ -15,10 +15,14 @@ export const Route = createFileRoute("/computer")({
       { title: "Play the Computer — Chess Room" },
       {
         name: "description",
-        content: "Play Stockfish in your browser across six strength levels, from beginner to master. No account needed.",
+        content:
+          "Play Stockfish in your browser across six strength levels, from beginner to master. No account needed.",
       },
       { property: "og:title", content: "Play the Computer — Chess Room" },
-      { property: "og:description", content: "Six Stockfish strength levels, running entirely in your browser." },
+      {
+        property: "og:description",
+        content: "Six Stockfish strength levels, running entirely in your browser.",
+      },
     ],
   }),
   component: ComputerPage,
@@ -35,7 +39,7 @@ function ComputerPage() {
     result: null,
     reason: null,
   });
-  const { ready, thinking, requestMove } = useStockfish();
+  const { ready, thinking, requestMove, stop } = useStockfish();
   const difficulty = DIFFICULTIES[level]!;
   const engineColor = myColor === "w" ? "b" : "w";
   const busyRef = useRef(false);
@@ -62,28 +66,32 @@ function ComputerPage() {
         skill: difficulty.skill,
         onBestMove: (uci) => {
           try {
+            const from = uci.slice(0, 2);
+            const to = uci.slice(2, 4);
+            const promoChar = uci[4];
+            const promotion = promoChar ? (promoChar.toLowerCase() as "q" | "r" | "b" | "n") : "q";
             const move = chess.move({
-              from: uci.slice(0, 2),
-              to: uci.slice(2, 4),
-              promotion: (uci[4] as "q" | undefined) ?? "q",
+              from,
+              to,
+              promotion,
             });
             if (move) setLastMove({ from: move.from, to: move.to });
           } catch {
-            /* ignore */
+            /* ignore invalid moves */
           }
           busyRef.current = false;
           sync();
         },
       });
-    }, 350);
+    }, 300);
+
     return () => {
       clearTimeout(timer);
-      busyRef.current = false;
     };
   }, [ready, engineTurn, chess, difficulty, requestMove, sync, fen]);
 
   function handleMove(move: BoardMove) {
-    if (status.result) return;
+    if (status.result || chess.turn() !== myColor) return;
     try {
       const played = chess.move({ from: move.from, to: move.to, promotion: move.promotion ?? "q" });
       if (played) setLastMove({ from: played.from, to: played.to });
@@ -94,6 +102,7 @@ function ComputerPage() {
   }
 
   function newGame(color: "w" | "b" = myColor) {
+    stop();
     chess.reset();
     setMyColor(color);
     setLastMove(null);
@@ -103,11 +112,13 @@ function ComputerPage() {
   }
 
   function undo() {
-    if (thinking) return;
-    chess.undo();
-    chess.undo();
+    if (thinking || busyRef.current) return;
+    stop();
+    chess.undo(); // Undo engine move
+    chess.undo(); // Undo user move
     setStatus({ result: null, reason: null });
     setLastMove(null);
+    busyRef.current = false;
     sync();
   }
 
@@ -128,7 +139,8 @@ function ComputerPage() {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <p className="font-display text-lg font-bold">
-              Stockfish · {difficulty.label} <span className="text-muted-foreground">({difficulty.elo})</span>
+              Stockfish · {difficulty.label}{" "}
+              <span className="text-muted-foreground">({difficulty.elo})</span>
             </p>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">
               {status.result
@@ -147,7 +159,7 @@ function ComputerPage() {
             orientation={myColor}
             myColor={myColor}
             lastMove={lastMove}
-            interactive={!status.result}
+            interactive={!status.result && chess.turn() === myColor && !thinking}
             onMove={handleMove}
           />
         </div>
@@ -183,7 +195,12 @@ function ComputerPage() {
               <Button size="sm" variant="outline" onClick={() => newGame("b")}>
                 New as black
               </Button>
-              <Button size="sm" variant="ghost" onClick={undo} disabled={history.length < 2}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={undo}
+                disabled={history.length < 2 || thinking}
+              >
                 Undo
               </Button>
             </div>

@@ -1,7 +1,16 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronLeft, ChevronRight, Copy, Flag, Handshake, RefreshCw, RotateCcw, Send } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Flag,
+  Handshake,
+  RefreshCw,
+  RotateCcw,
+  Send,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -34,9 +43,15 @@ export const Route = createFileRoute("/game/$code")({
   head: () => ({
     meta: [
       { title: "Game Room — Chess Room" },
-      { name: "description", content: "A live chess room. Share the code to invite your opponent and play." },
+      {
+        name: "description",
+        content: "A live chess room. Share the code to invite your opponent and play.",
+      },
       { property: "og:title", content: "Game Room — Chess Room" },
-      { property: "og:description", content: "A live chess room with clocks, chat and PGN export." },
+      {
+        property: "og:description",
+        content: "A live chess room with clocks, chat and PGN export.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -66,7 +81,13 @@ type GameRow = {
 };
 
 type MoveRow = { ply: number; color: string; san: string; uci: string; fen_after: string };
-type ChatRow = { id: string; sender_name: string; sender_color: string; body: string; created_at: string };
+type ChatRow = {
+  id: string;
+  sender_name: string;
+  sender_color: string;
+  body: string;
+  created_at: string;
+};
 
 function GamePage() {
   const { code } = Route.useParams();
@@ -169,9 +190,13 @@ function GamePage() {
     const gameId = game.id;
     const channel = supabase
       .channel(`room-${gameId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "games", filter: `id=eq.${gameId}` }, () => {
-        void queryClient.invalidateQueries({ queryKey: ["game", code] });
-      })
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "games", filter: `id=eq.${gameId}` },
+        () => {
+          void queryClient.invalidateQueries({ queryKey: ["game", code] });
+        },
+      )
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "game_moves", filter: `game_id=eq.${gameId}` },
@@ -182,7 +207,12 @@ function GamePage() {
       )
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_messages", filter: `game_id=eq.${gameId}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: `game_id=eq.${gameId}`,
+        },
         () => {
           void queryClient.invalidateQueries({ queryKey: ["game-chat", gameId] });
         },
@@ -240,7 +270,8 @@ function GamePage() {
       at: Date.now(),
     });
     if (myColor && game.rated) {
-      const score = game.result === "1/2-1/2" ? 0.5 : (game.result === "1-0") === (myColor === "w") ? 1 : 0;
+      const score =
+        game.result === "1/2-1/2" ? 0.5 : (game.result === "1-0") === (myColor === "w") ? 1 : 0;
       applyRatingChange(score as 1 | 0 | 0.5);
     }
   }, [game, creds]);
@@ -248,7 +279,7 @@ function GamePage() {
   const displayFen = useMemo(() => {
     if (reviewPly === null) return game?.fen ?? "";
     const entry = moves[reviewPly];
-    return entry ? entry.fen_after : game?.fen ?? "";
+    return entry ? entry.fen_after : (game?.fen ?? "");
   }, [reviewPly, moves, game?.fen]);
 
   const lastMoveSquares = useMemo(() => {
@@ -258,11 +289,19 @@ function GamePage() {
     return { from: entry.uci.slice(0, 2), to: entry.uci.slice(2, 4) };
   }, [moves, reviewPly]);
 
-  const orientation: "w" | "b" = flipped ? (creds?.color === "b" ? "w" : "b") : (creds?.color ?? "w");
+  const orientation: "w" | "b" = flipped
+    ? creds?.color === "b"
+      ? "w"
+      : "b"
+    : (creds?.color ?? "w");
   const reviewing = reviewPly !== null && reviewPly < moves.length - 1;
 
   const pairs = useMemo(() => {
-    const list: { no: number; white?: { san: string; ply: number }; black?: { san: string; ply: number } }[] = [];
+    const list: {
+      no: number;
+      white?: { san: string; ply: number };
+      black?: { san: string; ply: number };
+    }[] = [];
     moves.forEach((m, index) => {
       const no = Math.floor(index / 2) + 1;
       if (index % 2 === 0) list.push({ no, white: { san: m.san, ply: index } });
@@ -274,7 +313,9 @@ function GamePage() {
   async function handleMove(m: BoardMove) {
     if (!game || !creds || game.status !== "active") return;
     try {
-      await move({ data: { code, token: creds.token, from: m.from, to: m.to, promotion: m.promotion } });
+      await move({
+        data: { code, token: creds.token, from: m.from, to: m.to, promotion: m.promotion },
+      });
       await queryClient.invalidateQueries({ queryKey: ["game", code] });
       await queryClient.invalidateQueries({ queryKey: ["game-moves", game.id] });
     } catch (error) {
@@ -350,7 +391,8 @@ function GamePage() {
     );
   }
 
-  const inviteLink = typeof window !== "undefined" ? `${window.location.origin}/game/${game.code}` : "";
+  const inviteLink =
+    typeof window !== "undefined" ? `${window.location.origin}/game/${game.code}` : "";
   const topColor: "w" | "b" = orientation === "w" ? "b" : "w";
 
   return (
@@ -384,8 +426,12 @@ function GamePage() {
           {game.status === "waiting" && (
             <div className="paper mt-4 p-5 text-center">
               <p className="font-display text-xl font-bold">Waiting for an opponent</p>
-              <p className="mt-1 text-sm text-muted-foreground">Share this code or link to start the game.</p>
-              <p className="mt-4 font-display text-4xl font-extrabold tracking-[0.3em]">{game.code}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Share this code or link to start the game.
+              </p>
+              <p className="mt-4 font-display text-4xl font-extrabold tracking-[0.3em]">
+                {game.code}
+              </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <Button
                   size="sm"
@@ -457,10 +503,17 @@ function GamePage() {
                 <p className="eyebrow text-muted-foreground">Room {game.code}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {game.minutes}+{game.increment} · {game.rated ? "Rated (session)" : "Casual"}
-                  {creds ? ` · you play ${creds.color === "w" ? "white" : "black"}` : " · spectating"}
+                  {creds
+                    ? ` · you play ${creds.color === "w" ? "white" : "black"}`
+                    : " · spectating"}
                 </p>
               </div>
-              <Button size="icon" variant="ghost" onClick={() => setFlipped((f) => !f)} aria-label="Flip board">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setFlipped((f) => !f)}
+                aria-label="Flip board"
+              >
                 <RotateCcw className="h-4 w-4" />
               </Button>
             </div>
@@ -470,7 +523,9 @@ function GamePage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => act(() => resign({ data: { code, token: creds.token } }), "Could not resign")}
+                  onClick={() =>
+                    act(() => resign({ data: { code, token: creds.token } }), "Could not resign")
+                  }
                 >
                   <Flag className="mr-2 h-3.5 w-3.5" /> Resign
                 </Button>
@@ -506,7 +561,10 @@ function GamePage() {
                     variant="outline"
                     disabled={game.draw_offer_by === creds.color}
                     onClick={() =>
-                      act(() => draw({ data: { code, token: creds.token, action: "offer" } }), "Could not offer")
+                      act(
+                        () => draw({ data: { code, token: creds.token, action: "offer" } }),
+                        "Could not offer",
+                      )
                     }
                   >
                     <Handshake className="mr-2 h-3.5 w-3.5" />
@@ -561,7 +619,9 @@ function GamePage() {
                       <button
                         key={i}
                         type="button"
-                        onClick={() => setReviewPly(entry.ply === moves.length - 1 ? null : entry.ply)}
+                        onClick={() =>
+                          setReviewPly(entry.ply === moves.length - 1 ? null : entry.ply)
+                        }
                         className={cn(
                           "w-16 rounded px-1 text-left hover:bg-secondary",
                           reviewPly === entry.ply && "bg-accent text-accent-foreground",
@@ -586,7 +646,9 @@ function GamePage() {
           <div className="paper flex flex-col p-4">
             <p className="eyebrow text-muted-foreground">Chat</p>
             <div className="mt-3 max-h-52 min-h-24 flex-1 space-y-2 overflow-y-auto text-sm">
-              {messages.length === 0 && <p className="text-muted-foreground">Say hello. Keep it friendly.</p>}
+              {messages.length === 0 && (
+                <p className="text-muted-foreground">Say hello. Keep it friendly.</p>
+              )}
               {messages.map((message) => (
                 <p key={message.id}>
                   <span className="font-semibold">{message.sender_name}: </span>

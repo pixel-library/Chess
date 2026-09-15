@@ -66,7 +66,11 @@ function loadChess(pgn: string, fen: string) {
 
 async function fetchGame(code: string): Promise<GameRow> {
   const db = await admin();
-  const { data, error } = await db.from("games").select("*").eq("code", code.toUpperCase()).maybeSingle();
+  const { data, error } = await db
+    .from("games")
+    .select("*")
+    .eq("code", code.toUpperCase())
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Game not found");
   return data as GameRow;
@@ -138,7 +142,13 @@ export const createGame = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const db = await admin();
     const color: "w" | "b" =
-      data.color === "random" ? (Math.random() < 0.5 ? "w" : "b") : data.color === "white" ? "w" : "b";
+      data.color === "random"
+        ? Math.random() < 0.5
+          ? "w"
+          : "b"
+        : data.color === "white"
+          ? "w"
+          : "b";
     const ms = data.minutes * 60_000;
     const token = randomToken();
 
@@ -200,7 +210,11 @@ export const joinGame = createServerFn({ method: "POST" })
       return { code: game.code, color: existing.color as "w" | "b", token: existing.token };
     }
 
-    const freeColor: "w" | "b" | null = !game.white_session ? "w" : !game.black_session ? "b" : null;
+    const freeColor: "w" | "b" | null = !game.white_session
+      ? "w"
+      : !game.black_session
+        ? "b"
+        : null;
     if (!freeColor) throw new Error("This game already has two players");
 
     const token = randomToken();
@@ -360,7 +374,8 @@ export const drawAction = createServerFn({ method: "POST" })
         .eq("id", game.id);
       return { ok: true as const };
     }
-    if (!game.draw_offer_by || game.draw_offer_by === color) throw new Error("No draw offer to answer");
+    if (!game.draw_offer_by || game.draw_offer_by === color)
+      throw new Error("No draw offer to answer");
     if (data.action === "decline") {
       await db
         .from("games")
@@ -466,7 +481,11 @@ export const requestRematch = createServerFn({ method: "POST" })
         .update({ rematch_game_code: created.code, updated_at: now })
         .eq("id", game.id);
       const myColor: "w" | "b" = color === "w" ? "b" : "w";
-      return { code: created.code, color: myColor, token: myColor === "w" ? whiteToken : blackToken };
+      return {
+        code: created.code,
+        color: myColor,
+        token: myColor === "w" ? whiteToken : blackToken,
+      };
     }
     await db
       .from("games")
@@ -543,20 +562,18 @@ export const quickMatch = createServerFn({ method: "POST" })
       return { matched: true as const, code: created.code, color: "b" as const, token: blackToken };
     }
 
-    await db
-      .from("matchmaking_queue")
-      .upsert(
-        {
-          session_id: data.sessionId,
-          player_name: data.name,
-          minutes: data.minutes,
-          increment: data.increment,
-          rated: data.rated,
-          game_id: null,
-          created_at: new Date().toISOString(),
-        },
-        { onConflict: "session_id" },
-      );
+    await db.from("matchmaking_queue").upsert(
+      {
+        session_id: data.sessionId,
+        player_name: data.name,
+        minutes: data.minutes,
+        increment: data.increment,
+        rated: data.rated,
+        game_id: null,
+        created_at: new Date().toISOString(),
+      },
+      { onConflict: "session_id" },
+    );
     return { matched: false as const };
   });
 
@@ -570,7 +587,11 @@ export const pollQueue = createServerFn({ method: "POST" })
       .eq("session_id", data.sessionId)
       .maybeSingle();
     if (!row?.game_id) return { matched: false as const };
-    const { data: game } = await db.from("games").select("code").eq("id", row.game_id).maybeSingle();
+    const { data: game } = await db
+      .from("games")
+      .select("code")
+      .eq("id", row.game_id)
+      .maybeSingle();
     const { data: seat } = await db
       .from("game_tokens")
       .select("color, token")
@@ -591,6 +612,10 @@ export const leaveQueue = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ sessionId: z.string().min(4).max(64) }).parse(d))
   .handler(async ({ data }) => {
     const db = await admin();
-    await db.from("matchmaking_queue").delete().eq("session_id", data.sessionId).is("game_id", null);
+    await db
+      .from("matchmaking_queue")
+      .delete()
+      .eq("session_id", data.sessionId)
+      .is("game_id", null);
     return { ok: true as const };
   });

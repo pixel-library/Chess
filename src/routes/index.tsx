@@ -16,7 +16,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Chess Room — Play Chess Online, No Account Required" },
       {
         property: "og:description",
-        content: "Real-time multiplayer chess with friends in one click. No account, no email, no password.",
+        content:
+          "Real-time multiplayer chess with friends in one click. No account, no email, no password.",
       },
     ],
   }),
@@ -24,12 +25,36 @@ export const Route = createFileRoute("/")({
 });
 
 const FEATURES = [
-  { n: "01", title: "Real-time multiplayer", body: "Moves appear instantly on both devices, validated on the server." },
-  { n: "02", title: "No account required", body: "A name is all you need. Your identity lives in this session only." },
-  { n: "03", title: "Play with friends", body: "Share a six-character room code or an invite link and start." },
-  { n: "04", title: "Stockfish opponent", body: "The real engine runs in your browser across six strength levels." },
-  { n: "05", title: "Full chess rules", body: "Castling, en passant, promotion, repetition, fifty-move, timeouts." },
-  { n: "06", title: "Clocks and PGN", body: "Bullet to classical time controls, replay and export every game." },
+  {
+    n: "01",
+    title: "Real-time multiplayer",
+    body: "Moves appear instantly on both devices, validated on the server.",
+  },
+  {
+    n: "02",
+    title: "No account required",
+    body: "A name is all you need. Your identity lives in this session only.",
+  },
+  {
+    n: "03",
+    title: "Play with friends",
+    body: "Share a six-character room code or an invite link and start.",
+  },
+  {
+    n: "04",
+    title: "Stockfish opponent",
+    body: "The real engine runs in your browser across six strength levels.",
+  },
+  {
+    n: "05",
+    title: "Full chess rules",
+    body: "Castling, en passant, promotion, repetition, fifty-move, timeouts.",
+  },
+  {
+    n: "06",
+    title: "Clocks and PGN",
+    body: "Bullet to classical time controls, replay and export every game.",
+  },
 ];
 
 function Landing() {
@@ -52,7 +77,8 @@ function Landing() {
               </span>
             </h1>
             <p className="mt-6 max-w-md text-base text-muted-foreground sm:text-lg">
-              Create a room, invite a friend, and start playing. No email, no password, nothing to install.
+              Create a room, invite a friend, and start playing. No email, no password, nothing to
+              install.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -100,7 +126,9 @@ function Landing() {
           <div className="grid gap-8 lg:grid-cols-2">
             <div>
               <p className="eyebrow text-muted-foreground">How a game starts</p>
-              <h2 className="display-xl mt-3 text-[clamp(1.7rem,3.6vw,2.4rem)]">Four steps, zero forms.</h2>
+              <h2 className="display-xl mt-3 text-[clamp(1.7rem,3.6vw,2.4rem)]">
+                Four steps, zero forms.
+              </h2>
             </div>
             <ol className="space-y-3">
               {[
@@ -124,7 +152,9 @@ function Landing() {
           <div className="ink-panel flex flex-col items-start gap-6 p-8 sm:flex-row sm:items-center sm:justify-between sm:p-12">
             <div>
               <h2 className="display-xl text-[clamp(1.6rem,3.4vw,2.2rem)]">Ready for a game?</h2>
-              <p className="mt-2 text-sm text-ink-foreground/70">Open a room now and share the code.</p>
+              <p className="mt-2 text-sm text-ink-foreground/70">
+                Open a room now and share the code.
+              </p>
             </div>
             <Button asChild size="lg" variant="secondary">
               <Link to="/play">Start a room</Link>

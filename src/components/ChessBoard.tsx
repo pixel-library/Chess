@@ -92,7 +92,8 @@ export function ChessBoard({
   function attemptMove(from: string, to: string) {
     const piece = chess.get(from as Square);
     const isPromotion =
-      piece?.type === "p" && ((piece.color === "w" && to[1] === "8") || (piece.color === "b" && to[1] === "1"));
+      piece?.type === "p" &&
+      ((piece.color === "w" && to[1] === "8") || (piece.color === "b" && to[1] === "1"));
     if (isPromotion) {
       setPending({ from, to });
       setSelected(null);

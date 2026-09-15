@@ -112,7 +112,9 @@ export function ChessDiagram({
         )}
       </div>
       {caption && (
-        <figcaption className="mt-3 text-center text-xs text-muted-foreground">{caption}</figcaption>
+        <figcaption className="mt-3 text-center text-xs text-muted-foreground">
+          {caption}
+        </figcaption>
       )}
     </figure>
   );

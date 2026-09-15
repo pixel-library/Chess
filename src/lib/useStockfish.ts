@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type EngineRequest = { fen: string; depth: number; skill: number; onBestMove: (uci: string) => void };
+type EngineRequest = {
+  fen: string;
+  depth: number;
+  skill: number;
+  onBestMove: (uci: string) => void;
+};
 
 /** Real Stockfish 18 (WASM, lite single-threaded) running in a Web Worker. */
 export function useStockfish() {
@@ -13,6 +18,11 @@ export function useStockfish() {
     if (typeof window === "undefined") return;
     const worker = new Worker("/engine/stockfish-18-lite-single.js");
     workerRef.current = worker;
+
+    worker.onerror = (err) => {
+      console.error("Stockfish worker error:", err);
+      setThinking(false);
+    };
 
     worker.onmessage = (event: MessageEvent) => {
       const line = typeof event.data === "string" ? event.data : String(event.data?.data ?? "");
@@ -29,15 +39,27 @@ export function useStockfish() {
         setThinking(false);
         const cb = pendingRef.current;
         pendingRef.current = null;
-        if (uci && uci !== "(none)" && cb) cb(uci);
+        if (uci && uci !== "(none)" && cb) {
+          cb(uci);
+        }
       }
     };
+
     worker.postMessage("uci");
 
     return () => {
       worker.terminate();
       workerRef.current = null;
+      pendingRef.current = null;
     };
+  }, []);
+
+  const stop = useCallback(() => {
+    pendingRef.current = null;
+    setThinking(false);
+    if (workerRef.current) {
+      workerRef.current.postMessage("stop");
+    }
   }, []);
 
   const requestMove = useCallback(({ fen, depth, skill, onBestMove }: EngineRequest) => {
@@ -51,5 +73,5 @@ export function useStockfish() {
     worker.postMessage(`go depth ${depth}`);
   }, []);
 
-  return { ready, thinking, requestMove };
+  return { ready, thinking, requestMove, stop };
 }
