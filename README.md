@@ -1,29 +1,29 @@
-# Welcome to your Lovable project
+# Chess Room
 
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+An anonymous real-time chess platform featuring online room creation, quick matchmaking, spectator mode, and Stockfish WASM computer play.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+You need Node.js (v20+) and npm.
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+git clone https://github.com/pixel-library/Chess.git
+cd Chess
+npm install
 npm run dev
 ```
 
+## Features
+
+- **Anonymous session identity**: Play without signing up or creating an account.
+- **Real-time multiplayer**: Play over Supabase realtime sockets with server-authoritative move validation.
+- **Play vs Computer**: Built-in Stockfish 18 WASM worker with 6 difficulty levels.
+- **Full Chess Rules**: Castling, en passant, promotion, checkmate, stalemate, and timeout clock enforcement.
+- **PGN / FEN Export**: Copy and export PGN and FEN for finished games.
+
 ## Built with
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+- TanStack Start (SSR + React 19)
+- TanStack Router & TanStack Query
+- TypeScript & Tailwind CSS v4
+- Supabase JS Client & Stockfish WASM
