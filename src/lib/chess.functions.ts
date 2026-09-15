@@ -125,6 +125,13 @@ function remainingForMover(game: GameRow) {
   return base - elapsed;
 }
 
+function unwrapInput(d: unknown): unknown {
+  if (typeof d === "object" && d !== null && "data" in d) {
+    return (d as { data: unknown }).data;
+  }
+  return d;
+}
+
 export const createGame = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
@@ -137,7 +144,7 @@ export const createGame = createServerFn({ method: "POST" })
         rated: z.boolean(),
         isPublic: z.boolean(),
       })
-      .parse(d),
+      .parse(unwrapInput(d)),
   )
   .handler(async ({ data }) => {
     const db = await admin();
@@ -201,7 +208,7 @@ export const joinGame = createServerFn({ method: "POST" })
         name: z.string().trim().min(1).max(24),
         sessionId: z.string().min(4).max(64),
       })
-      .parse(d),
+      .parse(unwrapInput(d)),
   )
   .handler(async ({ data }) => {
     const db = await admin();
@@ -256,7 +263,7 @@ export const makeMove = createServerFn({ method: "POST" })
         to: z.string().regex(/^[a-h][1-8]$/),
         promotion: z.enum(["q", "r", "b", "n"]).optional(),
       })
-      .parse(d),
+      .parse(unwrapInput(d)),
   )
   .handler(async ({ data }) => {
     const db = await admin();
@@ -332,7 +339,9 @@ export const makeMove = createServerFn({ method: "POST" })
   });
 
 export const claimTimeout = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ code: z.string().trim().min(4).max(12) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ code: z.string().trim().min(4).max(12) }).parse(unwrapInput(d)),
+  )
   .handler(async ({ data }) => {
     const game = await fetchGame(data.code);
     if (game.status !== "active") return { ok: false as const };
@@ -349,7 +358,9 @@ export const claimTimeout = createServerFn({ method: "POST" })
 
 export const resignGame = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ code: z.string().min(4).max(12), token: z.string().min(8).max(128) }).parse(d),
+    z
+      .object({ code: z.string().min(4).max(12), token: z.string().min(8).max(128) })
+      .parse(unwrapInput(d)),
   )
   .handler(async ({ data }) => {
     const game = await fetchGame(data.code);
@@ -367,7 +378,7 @@ export const drawAction = createServerFn({ method: "POST" })
         token: z.string().min(8).max(128),
         action: z.enum(["offer", "accept", "decline"]),
       })
-      .parse(d),
+      .parse(unwrapInput(d)),
   )
   .handler(async ({ data }) => {
     const db = await admin();
@@ -403,7 +414,7 @@ export const sendChatMessage = createServerFn({ method: "POST" })
         token: z.string().min(8).max(128),
         body: z.string().trim().min(1).max(280),
       })
-      .parse(d),
+      .parse(unwrapInput(d)),
   )
   .handler(async ({ data }) => {
     const db = await admin();
@@ -431,7 +442,9 @@ export const sendChatMessage = createServerFn({ method: "POST" })
 
 export const requestRematch = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ code: z.string().min(4).max(12), token: z.string().min(8).max(128) }).parse(d),
+    z
+      .object({ code: z.string().min(4).max(12), token: z.string().min(8).max(128) })
+      .parse(unwrapInput(d)),
   )
   .handler(async ({ data }) => {
     const db = await admin();
@@ -512,7 +525,7 @@ export const quickMatch = createServerFn({ method: "POST" })
         increment: z.number().int().min(0).max(60),
         rated: z.boolean(),
       })
-      .parse(d),
+      .parse(unwrapInput(d)),
   )
   .handler(async ({ data }) => {
     const db = await admin();
@@ -586,7 +599,9 @@ export const quickMatch = createServerFn({ method: "POST" })
   });
 
 export const pollQueue = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ sessionId: z.string().min(4).max(64) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ sessionId: z.string().min(4).max(64) }).parse(unwrapInput(d)),
+  )
   .handler(async ({ data }) => {
     const db = await admin();
     const { data: row } = await db
@@ -617,7 +632,9 @@ export const pollQueue = createServerFn({ method: "POST" })
   });
 
 export const leaveQueue = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ sessionId: z.string().min(4).max(64) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ sessionId: z.string().min(4).max(64) }).parse(unwrapInput(d)),
+  )
   .handler(async ({ data }) => {
     const db = await admin();
     await db
