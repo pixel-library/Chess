@@ -133,19 +133,25 @@ function unwrapInput(d: unknown): unknown {
 }
 
 export const createGame = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
-    z
+  .inputValidator((d: unknown) => {
+    const raw = unwrapInput(d);
+    const parsed = z
       .object({
         name: z.string().trim().min(1).max(24),
-        sessionId: z.string().min(4).max(64),
+        sessionId: z.string().optional(),
         minutes: z.number().int().min(1).max(180),
         increment: z.number().int().min(0).max(60),
         color: z.enum(["white", "black", "random"]),
         rated: z.boolean(),
         isPublic: z.boolean(),
       })
-      .parse(unwrapInput(d)),
-  )
+      .parse(raw);
+    const sessionId =
+      parsed.sessionId && parsed.sessionId.length >= 4
+        ? parsed.sessionId
+        : randomToken().slice(0, 16);
+    return { ...parsed, sessionId };
+  })
   .handler(async ({ data }) => {
     const db = await admin();
     const color: "w" | "b" =
@@ -178,7 +184,7 @@ export const createGame = createServerFn({ method: "POST" })
           black_session: color === "b" ? data.sessionId : null,
         })
         .select("id, code")
-        .maybeSingle();
+        .single();
       if (error) {
         console.error("[createGame] insert error:", error);
         if (error.code === "23505") continue; // Unique constraint violation (duplicate code), retry
@@ -201,15 +207,21 @@ export const createGame = createServerFn({ method: "POST" })
   });
 
 export const joinGame = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
-    z
+  .inputValidator((d: unknown) => {
+    const raw = unwrapInput(d);
+    const parsed = z
       .object({
         code: z.string().trim().min(4).max(12),
         name: z.string().trim().min(1).max(24),
-        sessionId: z.string().min(4).max(64),
+        sessionId: z.string().optional(),
       })
-      .parse(unwrapInput(d)),
-  )
+      .parse(raw);
+    const sessionId =
+      parsed.sessionId && parsed.sessionId.length >= 4
+        ? parsed.sessionId
+        : randomToken().slice(0, 16);
+    return { ...parsed, sessionId };
+  })
   .handler(async ({ data }) => {
     const db = await admin();
     const game = await fetchGame(data.code);
