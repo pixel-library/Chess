@@ -51,6 +51,8 @@ function createSupabaseAdminClient() {
     throw new Error(message);
   }
 
+  class ServerDummyWebSocket {}
+
   return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     global: {
       fetch: createSupabaseFetch(SUPABASE_SERVICE_ROLE_KEY),
@@ -59,6 +61,9 @@ function createSupabaseAdminClient() {
       storage: undefined,
       persistSession: false,
       autoRefreshToken: false,
+    },
+    realtime: {
+      transport: ServerDummyWebSocket as unknown as typeof WebSocket,
     },
   });
 }
