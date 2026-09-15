@@ -97,6 +97,7 @@ function GamePage() {
   const [creds, setCreds] = useState<{ color: "w" | "b"; token: string } | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [reviewPly, setReviewPly] = useState<number | null>(null);
+  const [optimisticFen, setOptimisticFen] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [now, setNow] = useState(() => Date.now());
   const recordedRef = useRef(false);
@@ -112,7 +113,7 @@ function GamePage() {
 
   const gameQuery = useQuery({
     queryKey: ["game", code],
-    refetchInterval: 4000,
+    refetchInterval: 1200,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("games")
@@ -127,9 +128,14 @@ function GamePage() {
   });
   const game = gameQuery.data ?? null;
 
+  useEffect(() => {
+    setOptimisticFen(null);
+  }, [game?.fen]);
+
   const movesQuery = useQuery({
     queryKey: ["game-moves", game?.id],
     enabled: Boolean(game?.id),
+    refetchInterval: 1200,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("game_moves")
@@ -145,6 +151,7 @@ function GamePage() {
   const chatQuery = useQuery({
     queryKey: ["game-chat", game?.id],
     enabled: Boolean(game?.id),
+    refetchInterval: 1500,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("chat_messages")
@@ -277,10 +284,12 @@ function GamePage() {
   }, [game, creds]);
 
   const displayFen = useMemo(() => {
-    if (reviewPly === null) return game?.fen ?? "";
-    const entry = moves[reviewPly];
-    return entry ? entry.fen_after : (game?.fen ?? "");
-  }, [reviewPly, moves, game?.fen]);
+    if (reviewPly !== null) {
+      const entry = moves[reviewPly];
+      return entry ? entry.fen_after : (game?.fen ?? "");
+    }
+    return optimisticFen ?? game?.fen ?? "";
+  }, [reviewPly, moves, game?.fen, optimisticFen]);
 
   const lastMoveSquares = useMemo(() => {
     const index = reviewPly ?? moves.length - 1;
@@ -312,15 +321,37 @@ function GamePage() {
 
   async function handleMove(m: BoardMove) {
     if (!game || !creds || game.status !== "active") return;
+
+    // 0ms Optimistic UI update
+    try {
+      const chess = new Chess();
+      if (game.pgn && game.pgn.trim().length > 0) {
+        try {
+          chess.loadPgn(game.pgn);
+        } catch {
+          chess.load(game.fen);
+        }
+      } else {
+        chess.load(game.fen);
+      }
+      const played = chess.move({ from: m.from, to: m.to, promotion: m.promotion ?? "q" });
+      if (played) {
+        setOptimisticFen(chess.fen());
+      }
+    } catch {
+      /* ignore preview error */
+    }
+
     try {
       await move({
         data: { code, token: creds.token, from: m.from, to: m.to, promotion: m.promotion },
       });
-      await queryClient.invalidateQueries({ queryKey: ["game", code] });
-      await queryClient.invalidateQueries({ queryKey: ["game-moves", game.id] });
+      void queryClient.invalidateQueries({ queryKey: ["game", code] });
+      void queryClient.invalidateQueries({ queryKey: ["game-moves", game.id] });
     } catch (error) {
+      setOptimisticFen(null);
       toast.error(error instanceof Error ? error.message : "Move rejected");
-      await queryClient.invalidateQueries({ queryKey: ["game", code] });
+      void queryClient.invalidateQueries({ queryKey: ["game", code] });
     }
   }
 
