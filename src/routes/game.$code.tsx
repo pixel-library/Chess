@@ -114,7 +114,7 @@ function GamePage() {
 
   const gameQuery = useQuery({
     queryKey: ["game", code],
-    refetchInterval: 1200,
+    refetchInterval: 10000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("games")
@@ -136,7 +136,7 @@ function GamePage() {
   const movesQuery = useQuery({
     queryKey: ["game-moves", game?.id],
     enabled: Boolean(game?.id),
-    refetchInterval: 1200,
+    refetchInterval: 10000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("game_moves")
@@ -152,7 +152,7 @@ function GamePage() {
   const chatQuery = useQuery({
     queryKey: ["game-chat", game?.id],
     enabled: Boolean(game?.id),
-    refetchInterval: 1500,
+    refetchInterval: 10000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("chat_messages")

@@ -57,45 +57,40 @@ function ComputerPage() {
       setStatus({ result: chess.turn() === "w" ? "0-1" : "1-0", reason: "checkmate" });
     } else if (chess.isDraw() || chess.isStalemate()) {
       setStatus({ result: "1/2-1/2", reason: chess.isStalemate() ? "stalemate" : "draw" });
-    } else {
+    } else if (chess.turn() === myColor) {
       evaluatePosition(currentFen, difficulty.depth);
     }
-  }, [chess, difficulty.depth, evaluatePosition]);
+  }, [chess, difficulty.depth, evaluatePosition, myColor]);
 
   const engineTurn = chess.turn() === engineColor && !status.result;
 
   useEffect(() => {
     if (!ready || !engineTurn || busyRef.current) return;
     busyRef.current = true;
-    const timer = setTimeout(() => {
-      requestMove({
-        fen: chess.fen(),
-        depth: difficulty.depth,
-        skill: difficulty.skill,
-        onBestMove: (uci) => {
-          try {
-            const from = uci.slice(0, 2);
-            const to = uci.slice(2, 4);
-            const promoChar = uci[4];
-            const promotion = promoChar ? (promoChar.toLowerCase() as "q" | "r" | "b" | "n") : "q";
-            const move = chess.move({
-              from,
-              to,
-              promotion,
-            });
-            if (move) setLastMove({ from: move.from, to: move.to });
-          } catch {
-            /* ignore invalid moves */
-          }
-          busyRef.current = false;
-          sync();
-        },
-      });
-    }, 300);
 
-    return () => {
-      clearTimeout(timer);
-    };
+    requestMove({
+      fen: chess.fen(),
+      depth: difficulty.depth,
+      skill: difficulty.skill,
+      onBestMove: (uci) => {
+        try {
+          const from = uci.slice(0, 2);
+          const to = uci.slice(2, 4);
+          const promoChar = uci[4];
+          const promotion = promoChar ? (promoChar.toLowerCase() as "q" | "r" | "b" | "n") : "q";
+          const move = chess.move({
+            from,
+            to,
+            promotion,
+          });
+          if (move) setLastMove({ from: move.from, to: move.to });
+        } catch {
+          /* ignore invalid moves */
+        }
+        busyRef.current = false;
+        sync();
+      },
+    });
   }, [ready, engineTurn, chess, difficulty, requestMove, sync, fen]);
 
   function handleMove(move: BoardMove) {
