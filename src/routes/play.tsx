@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy } from "lucide-react";
+import { Copy, Globe, Lock, RefreshCw, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -11,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TIME_CONTROLS } from "@/lib/chess-shared";
-import { createGame, joinGame } from "@/lib/chess.functions";
+import { createGame, getPublicRooms, joinGame } from "@/lib/chess.functions";
 import {
   getPlayerName,
   getRecentGames,
@@ -26,14 +27,17 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/play")({
   head: () => ({
     meta: [
-      { title: "Play Online — Chess Room" },
+      { title: "Play Online — Public & Private Chess Rooms" },
       {
         name: "description",
         content:
-          "Enter a name, create a private room or join with a code, and play real-time chess instantly.",
+          "Create a public or private room, join open matches in the lobby, or play with friends via code.",
       },
-      { property: "og:title", content: "Play Online — Chess Room" },
-      { property: "og:description", content: "Private rooms or join by code. No account needed." },
+      { property: "og:title", content: "Play Online — Public & Private Chess Rooms" },
+      {
+        property: "og:description",
+        content: "Public lobby matches or private rooms by code. No signup required.",
+      },
     ],
   }),
   component: PlayPage,
@@ -58,6 +62,13 @@ function PlayPage() {
 
   const create = useServerFn(createGame);
   const join = useServerFn(joinGame);
+  const fetchPublic = useServerFn(getPublicRooms);
+
+  const publicRoomsQuery = useQuery({
+    queryKey: ["public-rooms"],
+    queryFn: () => fetchPublic(),
+    refetchInterval: 5000,
+  });
 
   useEffect(() => {
     const stored = getPlayerName();
@@ -90,10 +101,12 @@ function PlayPage() {
     }
   }
 
-  async function handleJoin() {
+  async function handleJoin(codeToJoin?: string) {
+    const code = codeToJoin || joinCode;
+    if (!code.trim()) return;
     setBusy(true);
     try {
-      const result = await join({ data: { code: joinCode.trim().toUpperCase(), name, sessionId } });
+      const result = await join({ data: { code: code.trim().toUpperCase(), name, sessionId } });
       enterGame(result);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not join that room");
@@ -128,7 +141,7 @@ function PlayPage() {
               placeholder="e.g. Rudra"
               onChange={(event) => setName(event.target.value)}
             />
-            <Button type="submit" size="lg" className="w-full" disabled={!name.trim()}>
+            <Button type="submit" size="lg" className="w-full font-bold" disabled={!name.trim()}>
               Continue
             </Button>
           </form>
@@ -143,29 +156,37 @@ function PlayPage() {
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="eyebrow text-muted-foreground">Player</p>
+            <p className="eyebrow text-muted-foreground">Player Profile</p>
             <h1 className="display-xl mt-2 text-3xl sm:text-4xl">{name}</h1>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Session {sessionId} · Temporary rating {rating}
+            <p className="mt-1 text-xs font-mono text-muted-foreground">
+              Session ID: {sessionId.slice(0, 8)}... · Temporary Rating: {rating}
             </p>
           </div>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => {
               setNameLocked(false);
             }}
           >
-            Change name
+            Change Handle
           </Button>
         </div>
 
         <Tabs defaultValue="create" className="mt-8">
-          <TabsList>
-            <TabsTrigger value="create">Create room</TabsTrigger>
-            <TabsTrigger value="join">Join with code</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="create" className="font-bold">
+              Create Room
+            </TabsTrigger>
+            <TabsTrigger value="lobby" className="font-bold">
+              Public Lobby
+            </TabsTrigger>
+            <TabsTrigger value="join" className="font-bold">
+              Join Code
+            </TabsTrigger>
           </TabsList>
 
+          {/* Create Room Tab */}
           <TabsContent value="create" className="paper mt-4 p-6">
             <TimeControlPicker
               minutes={minutes}
@@ -176,9 +197,69 @@ function PlayPage() {
               }}
             />
 
+            {/* Room Type Selector: Public vs Private Cards */}
+            <div className="mt-6">
+              <p className="eyebrow text-muted-foreground">Room Type & Access</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPublic(true)}
+                  className={cn(
+                    "flex items-start gap-3 rounded-xl border p-4 text-left transition-all",
+                    isPublic
+                      ? "border-accent bg-accent/10 shadow-sm ring-1 ring-accent"
+                      : "border-border hover:bg-secondary/60",
+                  )}
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/20 text-accent">
+                    <Globe className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-display font-bold text-foreground">🌐 Public Room</span>
+                      <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[0.65rem] font-bold text-emerald-400">
+                        Open Lobby
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Listed in the public lobby. Anyone browsing can join your match immediately.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsPublic(false)}
+                  className={cn(
+                    "flex items-start gap-3 rounded-xl border p-4 text-left transition-all",
+                    !isPublic
+                      ? "border-accent bg-accent/10 shadow-sm ring-1 ring-accent"
+                      : "border-border hover:bg-secondary/60",
+                  )}
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-500">
+                    <Lock className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-display font-bold text-foreground">
+                        🔒 Private Room
+                      </span>
+                      <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[0.65rem] font-bold text-amber-400">
+                        Invite Only
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Hidden from public lists. Accessible only with your room code or invite URL.
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="eyebrow text-muted-foreground">Custom</p>
+                <p className="eyebrow text-muted-foreground">Custom Time</p>
                 <div className="mt-2 flex gap-2">
                   <Input
                     type="number"
@@ -199,7 +280,7 @@ function PlayPage() {
                 </div>
               </div>
               <div>
-                <p className="eyebrow text-muted-foreground">Your colour</p>
+                <p className="eyebrow text-muted-foreground">Your Side</p>
                 <div className="mt-2 flex gap-2">
                   {(["white", "black", "random"] as const).map((option) => (
                     <button
@@ -207,7 +288,7 @@ function PlayPage() {
                       type="button"
                       onClick={() => setColorPref(option)}
                       className={cn(
-                        "flex-1 rounded-lg border px-3 py-2 text-sm capitalize transition-colors",
+                        "flex-1 rounded-lg border px-3 py-2 text-sm font-semibold capitalize transition-colors",
                         colorPref === option
                           ? "border-accent bg-accent text-accent-foreground"
                           : "border-border hover:bg-secondary",
@@ -220,25 +301,101 @@ function PlayPage() {
               </div>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-wrap gap-6">
-                <div className="flex items-center gap-3">
-                  <Switch id="create-rated" checked={rated} onCheckedChange={setRated} />
-                  <Label htmlFor="create-rated">Rated (session only)</Label>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Switch id="create-public" checked={isPublic} onCheckedChange={setIsPublic} />
-                  <Label htmlFor="create-public">Listed for spectators</Label>
-                </div>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border/60 pt-4">
+              <div className="flex items-center gap-3">
+                <Switch id="create-rated" checked={rated} onCheckedChange={setRated} />
+                <Label htmlFor="create-rated" className="font-semibold">
+                  Rated (session rating)
+                </Label>
               </div>
-              <Button size="lg" disabled={busy} onClick={handleCreate}>
-                Create room
+              <Button size="lg" disabled={busy} onClick={handleCreate} className="font-bold">
+                {isPublic ? "Create Public Room" : "Create Private Room"}
               </Button>
             </div>
           </TabsContent>
 
+          {/* Public Lobby Tab */}
+          <TabsContent value="lobby" className="paper mt-4 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-display text-lg font-bold">Public Open Rooms</h3>
+                <p className="text-xs text-muted-foreground">
+                  Live matches waiting for an opponent. Click join to play.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => publicRoomsQuery.refetch()}
+                disabled={publicRoomsQuery.isFetching}
+              >
+                <RefreshCw
+                  className={cn("mr-2 h-3.5 w-3.5", publicRoomsQuery.isFetching && "animate-spin")}
+                />
+                Refresh
+              </Button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {publicRoomsQuery.isLoading && (
+                <p className="text-sm text-muted-foreground">Loading public games...</p>
+              )}
+              {publicRoomsQuery.data && publicRoomsQuery.data.length === 0 && (
+                <div className="rounded-xl border border-dashed border-border p-8 text-center">
+                  <Globe className="mx-auto h-8 w-8 text-muted-foreground/60" />
+                  <p className="mt-2 text-sm font-semibold text-foreground">
+                    No public rooms waiting right now
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Create a public room above and others will see it here!
+                  </p>
+                </div>
+              )}
+              {publicRoomsQuery.data?.map((room) => {
+                const hostName = room.white_name || room.black_name || "Host";
+                const hostSide = room.white_name ? "White" : "Black";
+                return (
+                  <div key={room.code} className="glass-card flex items-center justify-between p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/20 font-display text-base font-bold text-accent">
+                        {hostSide === "White" ? "♔" : "♚"}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-foreground">{hostName}</span>
+                          <span className="rounded bg-secondary px-2 py-0.5 font-mono text-xs font-bold text-muted-foreground">
+                            {room.minutes}+{room.increment}
+                          </span>
+                          {room.rated && (
+                            <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[0.65rem] font-bold text-amber-400">
+                              Rated
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Room Code: <span className="font-mono font-semibold">{room.code}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={busy}
+                      onClick={() => handleJoin(room.code)}
+                      className="font-bold"
+                    >
+                      Join Game
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Join Code Tab */}
           <TabsContent value="join" className="paper mt-4 p-6">
-            <Label htmlFor="join-code">Room code</Label>
+            <Label htmlFor="join-code" className="font-semibold">
+              Room Code
+            </Label>
             <div className="mt-2 flex gap-2">
               <Input
                 id="join-code"
@@ -248,12 +405,16 @@ function PlayPage() {
                 className="font-display text-lg uppercase tracking-[0.3em]"
                 onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
               />
-              <Button disabled={busy || joinCode.trim().length < 4} onClick={handleJoin}>
-                Join
+              <Button
+                disabled={busy || joinCode.trim().length < 4}
+                onClick={() => handleJoin()}
+                className="font-bold"
+              >
+                Join Match
               </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              An invite link works too — open it and you will be seated automatically.
+              Have an invite URL? Open it in your browser and you'll join automatically.
             </p>
           </TabsContent>
         </Tabs>

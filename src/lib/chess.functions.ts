@@ -656,3 +656,16 @@ export const leaveQueue = createServerFn({ method: "POST" })
       .is("game_id", null);
     return { ok: true as const };
   });
+
+export const getPublicRooms = createServerFn({ method: "GET" }).handler(async () => {
+  const db = await admin();
+  const { data, error } = await db
+    .from("games")
+    .select("id, code, minutes, increment, rated, white_name, black_name, created_at")
+    .eq("status", "waiting")
+    .eq("is_public", true)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  if (error) throw new Error(error.message);
+  return data ?? [];
+});
