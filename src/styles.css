@@ -115,16 +115,28 @@
   --board-frame: oklch(0.34 0.05 50);
 }
 
-[data-board-theme="marble"] {
-  --board-light: oklch(0.95 0.005 250);
-  --board-dark: oklch(0.62 0.02 250);
-  --board-frame: oklch(0.4 0.02 250);
+[data-board-theme="emerald"] {
+  --board-light: oklch(0.92 0.03 145);
+  --board-dark: oklch(0.48 0.1 150);
+  --board-frame: oklch(0.28 0.07 150);
 }
 
 [data-board-theme="midnight"] {
   --board-light: oklch(0.8 0.02 250);
   --board-dark: oklch(0.36 0.05 255);
   --board-frame: oklch(0.24 0.04 255);
+}
+
+[data-board-theme="cyberpunk"] {
+  --board-light: oklch(0.85 0.05 320);
+  --board-dark: oklch(0.42 0.18 295);
+  --board-frame: oklch(0.22 0.15 295);
+}
+
+[data-board-theme="slate"] {
+  --board-light: oklch(0.88 0.01 240);
+  --board-dark: oklch(0.44 0.02 240);
+  --board-frame: oklch(0.28 0.02 240);
 }
 
 .dark {

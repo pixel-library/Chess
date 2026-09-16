@@ -1,19 +1,26 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-export type BoardTheme = "classic" | "wood" | "marble" | "midnight";
+export type BoardTheme = "classic" | "wood" | "emerald" | "midnight" | "cyberpunk" | "slate";
+export type PieceStyle = "staunton" | "neo" | "glyph";
 
 export type Settings = {
   boardTheme: BoardTheme;
+  pieceStyle: PieceStyle;
   coordinates: boolean;
   sounds: boolean;
   volume: number;
+  premoves: boolean;
+  annotations: boolean;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
-  boardTheme: "classic",
+  boardTheme: "emerald",
+  pieceStyle: "staunton",
   coordinates: true,
   sounds: true,
   volume: 0.5,
+  premoves: true,
+  annotations: true,
 };
 
 const STORAGE_KEY = "chess.settings";

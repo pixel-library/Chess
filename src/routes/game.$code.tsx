@@ -15,6 +15,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ChessBoard, type BoardMove } from "@/components/ChessBoard";
+import { notifyTurn, requestNotificationPermission, resetTitle } from "@/lib/notifications";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -230,10 +231,20 @@ function GamePage() {
     };
   }, [game?.id, code, queryClient]);
 
+  // Notification permission request on room join
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 100);
-    return () => clearInterval(id);
+    requestNotificationPermission();
   }, []);
+
+  // Notification trigger on turn change
+  useEffect(() => {
+    if (game?.status === "active" && creds && game.turn === creds.color) {
+      notifyTurn(game.code);
+    } else {
+      resetTitle();
+    }
+    return () => resetTitle();
+  }, [game?.status, game?.turn, game?.code, creds]);
 
   const clocks = useMemo(() => {
     if (!game) return { w: 0, b: 0 };

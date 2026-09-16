@@ -4,8 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { SiteHeader } from "@/components/SiteHeader";
 import { ChessBoard, type BoardMove } from "@/components/ChessBoard";
+import { EvalBar } from "@/components/EvalBar";
 import { Button } from "@/components/ui/button";
 import { DIFFICULTIES, resultText } from "@/lib/chess-shared";
+import { useSettings, type BoardTheme, type PieceStyle } from "@/lib/settings";
 import { useStockfish } from "@/lib/useStockfish";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +23,8 @@ export const Route = createFileRoute("/computer")({
       { property: "og:title", content: "Play the Computer — Chess Room" },
       {
         property: "og:description",
-        content: "Six Stockfish strength levels, running entirely in your browser.",
+        content:
+          "Six Stockfish strength levels with live evaluation, running entirely in your browser.",
       },
     ],
   }),
@@ -39,20 +42,25 @@ function ComputerPage() {
     result: null,
     reason: null,
   });
-  const { ready, thinking, requestMove, stop } = useStockfish();
+
+  const { settings, update: updateSettings } = useSettings();
+  const { ready, thinking, evaluation, requestMove, evaluatePosition, stop } = useStockfish();
   const difficulty = DIFFICULTIES[level]!;
   const engineColor = myColor === "w" ? "b" : "w";
   const busyRef = useRef(false);
 
   const sync = useCallback(() => {
-    setFen(chess.fen());
+    const currentFen = chess.fen();
+    setFen(currentFen);
     setHistory(chess.history());
     if (chess.isCheckmate()) {
       setStatus({ result: chess.turn() === "w" ? "0-1" : "1-0", reason: "checkmate" });
     } else if (chess.isDraw() || chess.isStalemate()) {
       setStatus({ result: "1/2-1/2", reason: chess.isStalemate() ? "stalemate" : "draw" });
+    } else {
+      evaluatePosition(currentFen, difficulty.depth);
     }
-  }, [chess]);
+  }, [chess, difficulty.depth, evaluatePosition]);
 
   const engineTurn = chess.turn() === engineColor && !status.result;
 
@@ -135,7 +143,7 @@ function ComputerPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
           <div className="mb-3 flex items-center justify-between">
             <p className="font-display text-lg font-bold">
@@ -154,19 +162,28 @@ function ComputerPage() {
                       : "Engine to move"}
             </p>
           </div>
-          <ChessBoard
-            fen={fen}
-            orientation={myColor}
-            myColor={myColor}
-            lastMove={lastMove}
-            interactive={!status.result && chess.turn() === myColor && !thinking}
-            onMove={handleMove}
-          />
+
+          <div className="flex gap-3">
+            {/* Live Evaluation Bar */}
+            <EvalBar evaluation={evaluation} turn={chess.turn()} orientation={myColor} />
+
+            {/* Main Chessboard */}
+            <div className="flex-1">
+              <ChessBoard
+                fen={fen}
+                orientation={myColor}
+                myColor={myColor}
+                lastMove={lastMove}
+                interactive={!status.result && chess.turn() === myColor && !thinking}
+                onMove={handleMove}
+              />
+            </div>
+          </div>
         </div>
 
         <aside className="space-y-4">
           <div className="paper p-5">
-            <p className="eyebrow text-muted-foreground">Strength</p>
+            <p className="eyebrow text-muted-foreground">Engine Strength</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {DIFFICULTIES.map((option, index) => (
                 <button
@@ -187,13 +204,62 @@ function ComputerPage() {
           </div>
 
           <div className="paper p-5">
-            <p className="eyebrow text-muted-foreground">Game</p>
+            <p className="eyebrow text-muted-foreground">Appearance</p>
+            <div className="mt-3 space-y-3 text-sm">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground">Pieces Style</label>
+                <div className="mt-1 flex gap-2">
+                  {(["staunton", "neo", "glyph"] as const).map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => updateSettings({ pieceStyle: st as PieceStyle })}
+                      className={cn(
+                        "flex-1 rounded-md border px-2 py-1 text-xs font-semibold capitalize",
+                        settings.pieceStyle === st
+                          ? "border-accent bg-accent text-accent-foreground"
+                          : "border-border hover:bg-secondary",
+                      )}
+                    >
+                      {st}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground">Board Theme</label>
+                <div className="mt-1 grid grid-cols-3 gap-2">
+                  {(["emerald", "wood", "midnight", "cyberpunk", "slate", "classic"] as const).map(
+                    (th) => (
+                      <button
+                        key={th}
+                        type="button"
+                        onClick={() => updateSettings({ boardTheme: th as BoardTheme })}
+                        className={cn(
+                          "rounded-md border px-2 py-1 text-xs font-semibold capitalize",
+                          settings.boardTheme === th
+                            ? "border-accent bg-accent text-accent-foreground"
+                            : "border-border hover:bg-secondary",
+                        )}
+                      >
+                        {th}
+                      </button>
+                    ),
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="paper p-5">
+            <p className="eyebrow text-muted-foreground">Game Controls</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button size="sm" onClick={() => newGame("w")}>
-                New as white
+                New as White
               </Button>
               <Button size="sm" variant="outline" onClick={() => newGame("b")}>
-                New as black
+                New as Black
               </Button>
               <Button
                 size="sm"
@@ -207,8 +273,8 @@ function ComputerPage() {
           </div>
 
           <div className="paper p-5">
-            <p className="eyebrow text-muted-foreground">Moves</p>
-            <div className="mt-3 max-h-72 overflow-y-auto font-mono text-sm">
+            <p className="eyebrow text-muted-foreground">Move History</p>
+            <div className="mt-3 max-h-56 overflow-y-auto font-mono text-sm">
               {pairs.length === 0 && <p className="text-muted-foreground">No moves yet.</p>}
               {pairs.map((pair) => (
                 <div key={pair.no} className="flex gap-3 py-0.5">
