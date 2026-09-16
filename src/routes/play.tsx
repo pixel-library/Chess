@@ -197,86 +197,36 @@ function PlayPage() {
               }}
             />
 
-            {/* Room Type Selector: Public vs Private Cards */}
-            <div className="mt-6">
-              <p className="eyebrow text-muted-foreground">Room Type & Access</p>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => setIsPublic(true)}
-                  className={cn(
-                    "flex items-start gap-3 rounded-xl border p-4 text-left transition-all",
-                    isPublic
-                      ? "border-accent bg-accent/10 shadow-sm ring-1 ring-accent"
-                      : "border-border hover:bg-secondary/60",
-                  )}
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/20 text-accent">
-                    <Globe className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-display font-bold text-foreground">🌐 Public Room</span>
-                      <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[0.65rem] font-bold text-emerald-400">
-                        Open Lobby
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Listed in the public lobby. Anyone browsing can join your match immediately.
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsPublic(false)}
-                  className={cn(
-                    "flex items-start gap-3 rounded-xl border p-4 text-left transition-all",
-                    !isPublic
-                      ? "border-accent bg-accent/10 shadow-sm ring-1 ring-accent"
-                      : "border-border hover:bg-secondary/60",
-                  )}
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-500">
-                    <Lock className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-display font-bold text-foreground">
-                        🔒 Private Room
-                      </span>
-                      <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[0.65rem] font-bold text-amber-400">
-                        Invite Only
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Hidden from public lists. Accessible only with your room code or invite URL.
-                    </p>
-                  </div>
-                </button>
-              </div>
-            </div>
-
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="eyebrow text-muted-foreground">Custom Time</p>
+                <p className="eyebrow text-muted-foreground">Room Access</p>
                 <div className="mt-2 flex gap-2">
-                  <Input
-                    type="number"
-                    min={1}
-                    max={180}
-                    value={minutes}
-                    onChange={(event) => setMinutes(Number(event.target.value) || 1)}
-                    aria-label="Minutes"
-                  />
-                  <Input
-                    type="number"
-                    min={0}
-                    max={60}
-                    value={increment}
-                    onChange={(event) => setIncrement(Number(event.target.value) || 0)}
-                    aria-label="Increment seconds"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsPublic(true)}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors",
+                      isPublic
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border hover:bg-secondary text-muted-foreground",
+                    )}
+                  >
+                    <Globe className="h-4 w-4" />
+                    Public
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsPublic(false)}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors",
+                      !isPublic
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border hover:bg-secondary text-muted-foreground",
+                    )}
+                  >
+                    <Lock className="h-4 w-4" />
+                    Private
+                  </button>
                 </div>
               </div>
               <div>
@@ -291,7 +241,7 @@ function PlayPage() {
                         "flex-1 rounded-lg border px-3 py-2 text-sm font-semibold capitalize transition-colors",
                         colorPref === option
                           ? "border-accent bg-accent text-accent-foreground"
-                          : "border-border hover:bg-secondary",
+                          : "border-border hover:bg-secondary text-muted-foreground",
                       )}
                     >
                       {option}
