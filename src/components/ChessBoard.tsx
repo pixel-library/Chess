@@ -269,7 +269,7 @@ export function ChessBoard({
                   draggable={Boolean(cell) && canMoveNow && cell?.color === turn}
                   aria-label={`${square}${cell ? ` ${cell.color === "w" ? "white" : "black"} ${cell.type}` : " empty"}`}
                   className={cn(
-                    "relative flex aspect-square touch-manipulation items-center justify-center transition-colors select-none",
+                    "relative flex aspect-square touch-manipulation items-center justify-center transition-colors select-none overflow-hidden p-1",
                     isDark ? "bg-board-dark" : "bg-board-light",
                     isLast && "outline outline-2 -outline-offset-2 outline-accent/80",
                     (isPremoveFrom || isPremoveTo) && "bg-amber-500/40",

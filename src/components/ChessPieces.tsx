@@ -23,20 +23,24 @@ const GLYPHS: Record<string, string> = {
 /**
  * Staunton, Neo Vector SVG & Classic Glyph Chess Pieces
  */
+import { cn } from "@/lib/utils";
+
 export function ChessPiece({
   type,
   color,
-  style = "glyph",
-  className = "w-full h-full",
+  style = "staunton",
+  className = "",
 }: PieceProps) {
   if (style === "glyph") {
     return (
       <span
-        className={`pointer-events-none relative z-10 select-none text-[clamp(1.6rem,7.4vw,3.1rem)] leading-none ${
+        className={cn(
+          "pointer-events-none relative z-10 flex h-full w-full items-center justify-center select-none text-[clamp(1.2rem,4.5vw,2.2rem)] leading-none",
           color === "w"
             ? "text-board-light [text-shadow:0_0_1px_oklch(0.17_0.008_60),0_1px_0_oklch(0.17_0.008_60),1px_0_0_oklch(0.17_0.008_60),-1px_0_0_oklch(0.17_0.008_60),0_-1px_0_oklch(0.17_0.008_60),0_3px_6px_oklch(0.17_0.008_60/0.35)]"
-            : "text-ink [text-shadow:0_1px_0_oklch(0.93_0.018_85/0.35),0_3px_6px_oklch(0.17_0.008_60/0.35)]"
-        } ${className}`}
+            : "text-ink [text-shadow:0_1px_0_oklch(0.93_0.018_85/0.35),0_3px_6px_oklch(0.17_0.008_60/0.35)]",
+          className,
+        )}
       >
         {GLYPHS[type]}
       </span>
@@ -52,7 +56,7 @@ export function ChessPiece({
     return (
       <svg
         viewBox="0 0 45 45"
-        className={`pointer-events-none select-none drop-shadow-md transition-transform duration-150 ${className}`}
+        className={cn("pointer-events-none h-full w-full select-none drop-shadow-md transition-transform duration-150", className)}
       >
         {renderNeoPiece(type, isWhite)}
       </svg>
@@ -63,7 +67,7 @@ export function ChessPiece({
   return (
     <svg
       viewBox="0 0 45 45"
-      className={`pointer-events-none select-none drop-shadow-md transition-transform duration-150 ${className}`}
+      className={cn("pointer-events-none h-full w-full select-none drop-shadow-md transition-transform duration-150", className)}
     >
       {renderStauntonPiece(type, fillColor, strokeColor, accentColor)}
     </svg>
