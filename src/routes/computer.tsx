@@ -139,44 +139,46 @@ function ComputerPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div>
-          {/* Top Player (Engine) */}
-          <PlayerBar
-            name={`Stockfish ${difficulty.label}`}
-            color={engineColor}
-            ms={0}
-            active={chess.turn() === engineColor && !status.result}
-            fen={fen}
-            rating={difficulty.elo}
-            isBot={true}
-          />
+      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-3 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:py-4 lg:items-start">
+        <div className="flex flex-col items-center lg:items-stretch">
+          <div className="w-full max-w-[min(100%,calc(100vh-210px))] mx-auto">
+            {/* Top Player (Engine) */}
+            <PlayerBar
+              name={`Stockfish ${difficulty.label}`}
+              color={engineColor}
+              ms={0}
+              active={chess.turn() === engineColor && !status.result}
+              fen={fen}
+              rating={difficulty.elo}
+              isBot={true}
+            />
 
-          <div className="my-3 flex gap-3">
-            {/* Live Evaluation Bar */}
-            <EvalBar evaluation={evaluation} turn={chess.turn()} orientation={myColor} />
+            <div className="my-2 flex gap-3">
+              {/* Live Evaluation Bar */}
+              <EvalBar evaluation={evaluation} turn={chess.turn()} orientation={myColor} />
 
-            {/* Main Chessboard */}
-            <div className="flex-1">
-              <ChessBoard
-                fen={fen}
-                orientation={myColor}
-                myColor={myColor}
-                lastMove={lastMove}
-                interactive={!status.result && chess.turn() === myColor && !thinking}
-                onMove={handleMove}
-              />
+              {/* Main Chessboard */}
+              <div className="flex-1">
+                <ChessBoard
+                  fen={fen}
+                  orientation={myColor}
+                  myColor={myColor}
+                  lastMove={lastMove}
+                  interactive={!status.result && chess.turn() === myColor && !thinking}
+                  onMove={handleMove}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Bottom Player (Human) */}
-          <PlayerBar
-            name="You"
-            color={myColor}
-            ms={0}
-            active={chess.turn() === myColor && !status.result}
-            fen={fen}
-          />
+            {/* Bottom Player (Human) */}
+            <PlayerBar
+              name="You"
+              color={myColor}
+              ms={0}
+              active={chess.turn() === myColor && !status.result}
+              fen={fen}
+            />
+          </div>
         </div>
 
         <aside className="space-y-4">

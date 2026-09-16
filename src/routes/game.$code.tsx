@@ -485,32 +485,34 @@ function GamePage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div>
-          <PlayerBar
-            name={(topColor === "w" ? game.white_name : game.black_name) ?? "Waiting…"}
-            color={topColor}
-            ms={topColor === "w" ? clocks.w : clocks.b}
-            active={game.status === "active" && game.turn === topColor}
-            fen={displayFen}
-          />
-          <div className="my-2">
-            <ChessBoard
+      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-3 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:py-4 lg:items-start">
+        <div className="flex flex-col items-center lg:items-stretch">
+          <div className="w-full max-w-[min(100%,calc(100vh-210px))] mx-auto">
+            <PlayerBar
+              name={(topColor === "w" ? game.white_name : game.black_name) ?? "Waiting…"}
+              color={topColor}
+              ms={topColor === "w" ? clocks.w : clocks.b}
+              active={game.status === "active" && game.turn === topColor}
               fen={displayFen}
-              orientation={orientation}
-              myColor={creds?.color ?? null}
-              lastMove={lastMoveSquares}
-              interactive={Boolean(creds) && game.status === "active" && !reviewing}
-              onMove={handleMove}
+            />
+            <div className="my-2">
+              <ChessBoard
+                fen={displayFen}
+                orientation={orientation}
+                myColor={creds?.color ?? null}
+                lastMove={lastMoveSquares}
+                interactive={Boolean(creds) && game.status === "active" && !reviewing}
+                onMove={handleMove}
+              />
+            </div>
+            <PlayerBar
+              name={(orientation === "w" ? game.white_name : game.black_name) ?? "Waiting…"}
+              color={orientation}
+              ms={orientation === "w" ? clocks.w : clocks.b}
+              active={game.status === "active" && game.turn === orientation}
+              fen={displayFen}
             />
           </div>
-          <PlayerBar
-            name={(orientation === "w" ? game.white_name : game.black_name) ?? "Waiting…"}
-            color={orientation}
-            ms={orientation === "w" ? clocks.w : clocks.b}
-            active={game.status === "active" && game.turn === orientation}
-            fen={displayFen}
-          />
 
           {game.status === "waiting" && (
             <div className="paper mt-4 p-5 text-center">
