@@ -485,9 +485,9 @@ function GamePage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-3 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:py-4 lg:items-start">
+      <main className="mx-auto grid max-w-6xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:py-3 lg:items-start">
         <div className="flex flex-col items-center lg:items-stretch">
-          <div className="w-full max-w-[min(100%,calc(100vh-210px))] mx-auto">
+          <div className="w-full max-w-[min(100%,calc(100vh-165px))] mx-auto">
             <PlayerBar
               name={(topColor === "w" ? game.white_name : game.black_name) ?? "Waiting…"}
               color={topColor}
@@ -495,7 +495,7 @@ function GamePage() {
               active={game.status === "active" && game.turn === topColor}
               fen={displayFen}
             />
-            <div className="my-2">
+            <div className="my-1.5">
               <ChessBoard
                 fen={displayFen}
                 orientation={orientation}
