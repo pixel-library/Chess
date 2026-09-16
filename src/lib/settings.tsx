@@ -14,8 +14,8 @@ export type Settings = {
 };
 
 export const DEFAULT_SETTINGS: Settings = {
-  boardTheme: "emerald",
-  pieceStyle: "staunton",
+  boardTheme: "classic",
+  pieceStyle: "glyph",
   coordinates: true,
   sounds: true,
   volume: 0.5,
