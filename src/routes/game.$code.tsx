@@ -101,10 +101,14 @@ function GamePage() {
   const [flipped, setFlipped] = useState(false);
   const [reviewPly, setReviewPly] = useState<number | null>(null);
   const [optimisticFen, setOptimisticFen] = useState<string | null>(null);
+  const [broadcastLastMove, setBroadcastLastMove] = useState<{ from: string; to: string } | null>(
+    null,
+  );
   const [draft, setDraft] = useState("");
   const [now, setNow] = useState(() => Date.now());
   const recordedRef = useRef(false);
   const timeoutRef = useRef(false);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const move = useServerFn(makeMove);
   const resign = useServerFn(resignGame);
@@ -116,7 +120,7 @@ function GamePage() {
 
   const gameQuery = useQuery({
     queryKey: ["game", code],
-    refetchInterval: 10000,
+    refetchInterval: (query) => (query.state.data?.status === "active" ? 2000 : 10000),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("games")
@@ -133,12 +137,13 @@ function GamePage() {
 
   useEffect(() => {
     setOptimisticFen(null);
+    setBroadcastLastMove(null);
   }, [game?.fen]);
 
   const movesQuery = useQuery({
     queryKey: ["game-moves", game?.id],
     enabled: Boolean(game?.id),
-    refetchInterval: 10000,
+    refetchInterval: (query) => (game?.status === "active" ? 2000 : 10000),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("game_moves")
@@ -154,7 +159,7 @@ function GamePage() {
   const chatQuery = useQuery({
     queryKey: ["game-chat", game?.id],
     enabled: Boolean(game?.id),
-    refetchInterval: 10000,
+    refetchInterval: 5000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("chat_messages")
@@ -194,12 +199,25 @@ function GamePage() {
     };
   }, [code, join, queryClient]);
 
-  // Realtime updates.
+  // Realtime updates with instant WebSocket Broadcast & Postgres CDC listeners
   useEffect(() => {
     if (!game?.id) return;
     const gameId = game.id;
-    const channel = supabase
-      .channel(`room-${gameId}`)
+    const channel = supabase.channel(`room-${gameId}`, {
+      config: { broadcast: { self: false } },
+    });
+
+    channel
+      .on("broadcast", { event: "move" }, (payload) => {
+        const data = payload["payload"] as { fen?: string; from?: string; to?: string };
+        if (data.fen) setOptimisticFen(data.fen);
+        if (data.from && data.to) setBroadcastLastMove({ from: data.from, to: data.to });
+        void queryClient.invalidateQueries({ queryKey: ["game", code] });
+        void queryClient.invalidateQueries({ queryKey: ["game-moves", gameId] });
+      })
+      .on("broadcast", { event: "chat" }, () => {
+        void queryClient.invalidateQueries({ queryKey: ["game-chat", gameId] });
+      })
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "games", filter: `id=eq.${gameId}` },
@@ -228,7 +246,11 @@ function GamePage() {
         },
       )
       .subscribe();
+
+    channelRef.current = channel;
+
     return () => {
+      channelRef.current = null;
       void supabase.removeChannel(channel);
     };
   }, [game?.id, code, queryClient]);
@@ -305,11 +327,16 @@ function GamePage() {
   }, [reviewPly, moves, game?.fen, optimisticFen]);
 
   const lastMoveSquares = useMemo(() => {
-    const index = reviewPly ?? moves.length - 1;
-    const entry = moves[index];
+    if (reviewPly !== null) {
+      const entry = moves[reviewPly];
+      if (!entry) return null;
+      return { from: entry.uci.slice(0, 2), to: entry.uci.slice(2, 4) };
+    }
+    if (broadcastLastMove) return broadcastLastMove;
+    const entry = moves[moves.length - 1];
     if (!entry) return null;
     return { from: entry.uci.slice(0, 2), to: entry.uci.slice(2, 4) };
-  }, [moves, reviewPly]);
+  }, [moves, reviewPly, broadcastLastMove]);
 
   const orientation: "w" | "b" = flipped
     ? creds?.color === "b"
@@ -335,7 +362,7 @@ function GamePage() {
   async function handleMove(m: BoardMove) {
     if (!game || !creds || game.status !== "active") return;
 
-    // 0ms Optimistic UI update
+    let nextFen: string | null = null;
     try {
       const chess = new Chess();
       if (game.pgn && game.pgn.trim().length > 0) {
@@ -349,7 +376,22 @@ function GamePage() {
       }
       const played = chess.move({ from: m.from, to: m.to, promotion: m.promotion ?? "q" });
       if (played) {
-        setOptimisticFen(chess.fen());
+        nextFen = chess.fen();
+        setOptimisticFen(nextFen);
+        setBroadcastLastMove({ from: m.from, to: m.to });
+
+        // Instant WebSocket Broadcast to opponent (<20ms latency)
+        channelRef.current?.send({
+          type: "broadcast",
+          event: "move",
+          payload: {
+            fen: nextFen,
+            from: m.from,
+            to: m.to,
+            promotion: m.promotion,
+            san: played.san,
+          },
+        });
       }
     } catch {
       /* ignore preview error */
@@ -363,6 +405,7 @@ function GamePage() {
       void queryClient.invalidateQueries({ queryKey: ["game-moves", game.id] });
     } catch (error) {
       setOptimisticFen(null);
+      setBroadcastLastMove(null);
       toast.error(error instanceof Error ? error.message : "Move rejected");
       void queryClient.invalidateQueries({ queryKey: ["game", code] });
     }
@@ -711,6 +754,11 @@ function GamePage() {
                   if (!body) return;
                   setDraft("");
                   try {
+                    channelRef.current?.send({
+                      type: "broadcast",
+                      event: "chat",
+                      payload: { body },
+                    });
                     await chat({ data: { code, token: creds.token, body } });
                     await queryClient.invalidateQueries({ queryKey: ["game-chat", game.id] });
                   } catch (error) {
