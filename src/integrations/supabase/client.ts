@@ -55,6 +55,11 @@ function createSupabaseClient() {
 
   class DummyWebSocket {}
 
+  const realtimeOptions =
+    typeof WebSocket !== "undefined"
+      ? {}
+      : { transport: DummyWebSocket as unknown as typeof WebSocket };
+
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     global: {
       fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
@@ -64,22 +69,20 @@ function createSupabaseClient() {
       persistSession: true,
       autoRefreshToken: true,
     },
-    realtime: {
-      transport:
-        typeof WebSocket !== "undefined"
-          ? undefined
-          : (DummyWebSocket as unknown as typeof WebSocket),
-    },
+    realtime: realtimeOptions,
   });
 }
 
-let _supabase: ReturnType<typeof createSupabaseClient> | undefined;
+let _supabase: ReturnType<typeof createSupabaseClient> | null = null;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
-export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>, {
-  get(_, prop, receiver) {
-    if (!_supabase) _supabase = createSupabaseClient();
-    return Reflect.get(_supabase, prop, receiver);
+export const supabase: ReturnType<typeof createSupabaseClient> = new Proxy(
+  {} as ReturnType<typeof createSupabaseClient>,
+  {
+    get(_, prop, receiver) {
+      if (!_supabase) _supabase = createSupabaseClient();
+      return Reflect.get(_supabase, prop, receiver);
+    },
   },
-});
+);

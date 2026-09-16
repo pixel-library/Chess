@@ -1,6 +1,6 @@
 let ctx: AudioContext | null = null;
 
-export type SoundType = "move" | "capture" | "check" | "victory" | "defeat" | "illegal";
+export type SoundType = "move" | "capture" | "check" | "castle" | "victory" | "defeat" | "illegal";
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -39,6 +39,21 @@ export function playMoveSound(volume: number, type: SoundType = "move") {
         osc.connect(gain).connect(audioCtx.destination);
         osc.start(now);
         osc.stop(now + 0.11);
+        break;
+      }
+      case "castle": {
+        [0, 0.07].forEach((delay) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(380 - delay * 1000, now + delay);
+          osc.frequency.exponentialRampToValueAtTime(200, now + delay + 0.06);
+          gain.gain.setValueAtTime(vol * 0.3, now + delay);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.08);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now + delay);
+          osc.stop(now + delay + 0.09);
+        });
         break;
       }
       case "capture": {

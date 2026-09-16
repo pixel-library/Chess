@@ -62,8 +62,18 @@ export function ChessBoard({
   useEffect(() => {
     if (prevFenRef.current && prevFenRef.current !== fen) {
       if (settings.sounds) {
-        const isCapture = chess.history({ verbose: true }).pop()?.captured;
-        playMoveSound(settings.volume, isCapture ? "capture" : "move");
+        const last = chess.history({ verbose: true }).pop();
+        if (chess.isCheckmate()) {
+          playMoveSound(settings.volume, myColor === turn ? "defeat" : "victory");
+        } else if (chess.inCheck()) {
+          playMoveSound(settings.volume, "check");
+        } else if (last?.san === "O-O" || last?.san === "O-O-O") {
+          playMoveSound(settings.volume, "castle");
+        } else if (last?.captured) {
+          playMoveSound(settings.volume, "capture");
+        } else {
+          playMoveSound(settings.volume, "move");
+        }
       }
       // Execute queued premove if it's now our turn
       if (premove && myColor === turn) {

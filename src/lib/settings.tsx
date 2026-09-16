@@ -3,6 +3,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 export type BoardTheme = "classic" | "wood" | "emerald" | "midnight" | "cyberpunk" | "slate";
 export type PieceStyle = "staunton" | "neo" | "glyph";
 
+export const BOARD_THEMES: { id: BoardTheme; label: string }[] = [
+  { id: "classic", label: "Classic Green" },
+  { id: "wood", label: "Warm Wood" },
+  { id: "emerald", label: "Deep Emerald" },
+  { id: "midnight", label: "Midnight Blue" },
+  { id: "cyberpunk", label: "Cyber Neon" },
+  { id: "slate", label: "Slate Grey" },
+];
+
 export type Settings = {
   boardTheme: BoardTheme;
   pieceStyle: PieceStyle;

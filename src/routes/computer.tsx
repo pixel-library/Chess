@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Chess } from "chess.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { SiteHeader } from "@/components/SiteHeader";
 import { ChessBoard, type BoardMove } from "@/components/ChessBoard";
 import { EvalBar } from "@/components/EvalBar";
+import { PlayerBar } from "@/components/PlayerBar";
+import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { DIFFICULTIES, resultText } from "@/lib/chess-shared";
 import { useSettings, type BoardTheme, type PieceStyle } from "@/lib/settings";
@@ -14,13 +15,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/computer")({
   head: () => ({
     meta: [
-      { title: "Play the Computer — Chess Room" },
+      { title: "Play Stockfish AI — Chess Room" },
       {
         name: "description",
         content:
           "Play Stockfish in your browser across six strength levels, from beginner to master. No account needed.",
       },
-      { property: "og:title", content: "Play the Computer — Chess Room" },
+      { property: "og:title", content: "Play Stockfish AI — Chess Room" },
       {
         property: "og:description",
         content:
@@ -140,25 +141,18 @@ function ComputerPage() {
       <SiteHeader />
       <main className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
-          <div className="mb-3 flex items-center justify-between">
-            <p className="font-display text-lg font-bold">
-              Stockfish · {difficulty.label}{" "}
-              <span className="text-muted-foreground">({difficulty.elo})</span>
-            </p>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">
-              {status.result
-                ? resultText(status.result, status.reason)
-                : !ready
-                  ? "Loading engine…"
-                  : thinking
-                    ? "Thinking…"
-                    : chess.turn() === myColor
-                      ? "Your move"
-                      : "Engine to move"}
-            </p>
-          </div>
+          {/* Top Player (Engine) */}
+          <PlayerBar
+            name={`Stockfish ${difficulty.label}`}
+            color={engineColor}
+            ms={0}
+            active={chess.turn() === engineColor && !status.result}
+            fen={fen}
+            rating={difficulty.elo}
+            isBot={true}
+          />
 
-          <div className="flex gap-3">
+          <div className="my-3 flex gap-3">
             {/* Live Evaluation Bar */}
             <EvalBar evaluation={evaluation} turn={chess.turn()} orientation={myColor} />
 
@@ -174,6 +168,15 @@ function ComputerPage() {
               />
             </div>
           </div>
+
+          {/* Bottom Player (Human) */}
+          <PlayerBar
+            name="You"
+            color={myColor}
+            ms={0}
+            active={chess.turn() === myColor && !status.result}
+            fen={fen}
+          />
         </div>
 
         <aside className="space-y-4">

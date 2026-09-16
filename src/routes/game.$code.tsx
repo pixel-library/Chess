@@ -14,7 +14,9 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { Chess } from "chess.js";
 import { ChessBoard, type BoardMove } from "@/components/ChessBoard";
+import { PlayerBar } from "@/components/PlayerBar";
 import { notifyTurn, requestNotificationPermission, resetTitle } from "@/lib/notifications";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
@@ -447,6 +449,7 @@ function GamePage() {
             color={topColor}
             ms={topColor === "w" ? clocks.w : clocks.b}
             active={game.status === "active" && game.turn === topColor}
+            fen={displayFen}
           />
           <div className="my-2">
             <ChessBoard
@@ -463,6 +466,7 @@ function GamePage() {
             color={orientation}
             ms={orientation === "w" ? clocks.w : clocks.b}
             active={game.status === "active" && game.turn === orientation}
+            fen={displayFen}
           />
 
           {game.status === "waiting" && (
@@ -728,47 +732,6 @@ function GamePage() {
           </div>
         </aside>
       </main>
-    </div>
-  );
-}
-
-function PlayerBar({
-  name,
-  color,
-  ms,
-  active,
-}: {
-  name: string;
-  color: "w" | "b";
-  ms: number;
-  active: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-between rounded-xl border border-border bg-card px-4 py-2",
-        active && "border-accent",
-      )}
-    >
-      <div className="flex items-center gap-3">
-        <span
-          className={cn(
-            "flex h-7 w-7 items-center justify-center rounded-full border border-border text-sm",
-            color === "w" ? "bg-board-light text-ink" : "bg-ink text-ink-foreground",
-          )}
-        >
-          {color === "w" ? "♔" : "♚"}
-        </span>
-        <span className="font-semibold">{name}</span>
-      </div>
-      <span
-        className={cn(
-          "font-display text-2xl font-extrabold tabular-nums",
-          ms < 20000 && active && "text-destructive",
-        )}
-      >
-        {formatClock(ms)}
-      </span>
     </div>
   );
 }
