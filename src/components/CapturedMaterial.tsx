@@ -72,25 +72,25 @@ export function CapturedMaterial({ fen, forColor, className = "" }: Props) {
     return { capturedPieces: captured, advantage: diff > 0 ? diff : 0 };
   }, [fen, forColor]);
 
-  if (capturedPieces.length === 0 && advantage === 0) return null;
-
   return (
-    <div className={`flex items-center gap-1.5 ${className}`}>
-      <div className="flex items-center -space-x-1">
-        {capturedPieces.map(({ type, count }) => (
-          <div key={type} className="flex items-center">
-            {Array.from({ length: count }).map((_, i) => (
-              <span key={i} className="inline-block h-4 w-4 drop-shadow-sm">
-                <ChessPiece
-                  type={type}
-                  color={forColor === "w" ? "b" : "w"}
-                  style={settings.pieceStyle}
-                />
-              </span>
-            ))}
-          </div>
-        ))}
-      </div>
+    <div className={`flex min-h-[18px] items-center gap-1.5 ${className}`}>
+      {capturedPieces.length > 0 && (
+        <div className="flex items-center -space-x-1">
+          {capturedPieces.map(({ type, count }) => (
+            <div key={type} className="flex items-center">
+              {Array.from({ length: count }).map((_, i) => (
+                <span key={i} className="inline-block h-4 w-4 drop-shadow-sm">
+                  <ChessPiece
+                    type={type}
+                    color={forColor === "w" ? "b" : "w"}
+                    style={settings.pieceStyle}
+                  />
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
       {advantage > 0 && (
         <span className="rounded bg-accent/20 px-1 py-0.5 font-mono text-[0.65rem] font-bold text-accent">
           +{advantage}

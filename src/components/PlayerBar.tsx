@@ -28,7 +28,7 @@ export function PlayerBar({
   return (
     <div
       className={cn(
-        "flex items-center justify-between rounded-xl border px-3 py-2 transition-all duration-300",
+        "flex min-h-[52px] items-center justify-between rounded-xl border px-3 py-2 transition-all duration-300",
         active
           ? "border-accent/80 bg-card shadow-md pulse-turn"
           : "border-border/60 bg-card/60 text-muted-foreground",

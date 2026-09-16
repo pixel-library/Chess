@@ -224,10 +224,10 @@ export function ChessBoard({
   }
 
   return (
-    <div className="relative w-full" data-board-theme={settings.boardTheme}>
-      <div className="rounded-2xl bg-board-frame p-2 shadow-plate sm:p-3">
+    <div className="relative w-full aspect-square" data-board-theme={settings.boardTheme}>
+      <div className="h-full w-full rounded-2xl bg-board-frame p-2 shadow-plate sm:p-3">
         <div
-          className="relative grid grid-cols-8 overflow-hidden rounded-lg"
+          className="relative grid grid-cols-8 aspect-square h-full w-full overflow-hidden rounded-lg"
           onContextMenu={(e) => e.preventDefault()}
         >
           {rows.map((row, rowIndex) =>
