@@ -91,12 +91,21 @@ function Landing() {
 
             {/* Quick Action Cards */}
             <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Button asChild size="lg" className="w-full sm:w-auto gap-2 font-bold shadow-lg shadow-amber-500/20">
+              <Button
+                asChild
+                size="lg"
+                className="w-full sm:w-auto gap-2 font-bold shadow-lg shadow-amber-500/20"
+              >
                 <Link to="/play">
                   <Users className="h-4 w-4" /> Play Online Now <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto gap-2 font-bold">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto gap-2 font-bold"
+              >
                 <Link to="/computer">
                   <Bot className="h-4 w-4" /> Vs Stockfish AI
                 </Link>
@@ -208,7 +217,9 @@ function Landing() {
                     {s.step}
                   </span>
                   <div>
-                    <h3 className="font-display font-bold text-foreground text-sm sm:text-base">{s.title}</h3>
+                    <h3 className="font-display font-bold text-foreground text-sm sm:text-base">
+                      {s.title}
+                    </h3>
                     <p className="mt-0.5 text-xs text-muted-foreground">{s.desc}</p>
                   </div>
                 </div>
@@ -229,7 +240,12 @@ function Landing() {
               </p>
             </div>
             <div className="relative z-10 flex flex-col sm:flex-row w-full sm:w-auto gap-3">
-              <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto font-bold justify-center">
+              <Button
+                asChild
+                size="lg"
+                variant="secondary"
+                className="w-full sm:w-auto font-bold justify-center"
+              >
                 <Link to="/play">Create Room</Link>
               </Button>
               <Button

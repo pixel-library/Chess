@@ -25,12 +25,7 @@ const GLYPHS: Record<string, string> = {
  */
 import { cn } from "@/lib/utils";
 
-export function ChessPiece({
-  type,
-  color,
-  style = "staunton",
-  className = "",
-}: PieceProps) {
+export function ChessPiece({ type, color, style = "staunton", className = "" }: PieceProps) {
   if (style === "glyph") {
     return (
       <span
@@ -56,7 +51,10 @@ export function ChessPiece({
     return (
       <svg
         viewBox="0 0 45 45"
-        className={cn("pointer-events-none h-full w-full select-none drop-shadow-md transition-transform duration-150", className)}
+        className={cn(
+          "pointer-events-none h-full w-full select-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.35)] transition-all duration-150 ease-out will-change-transform",
+          className,
+        )}
       >
         {renderNeoPiece(type, isWhite)}
       </svg>
@@ -67,7 +65,10 @@ export function ChessPiece({
   return (
     <svg
       viewBox="0 0 45 45"
-      className={cn("pointer-events-none h-full w-full select-none drop-shadow-md transition-transform duration-150", className)}
+      className={cn(
+        "pointer-events-none h-full w-full select-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.35)] transition-all duration-150 ease-out will-change-transform",
+        className,
+      )}
     >
       {renderStauntonPiece(type, fillColor, strokeColor, accentColor)}
     </svg>

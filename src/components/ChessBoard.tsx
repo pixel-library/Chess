@@ -13,6 +13,21 @@ export type BoardMove = { from: string; to: string; promotion?: "q" | "r" | "b" 
 
 type Arrow = { from: string; to: string };
 
+type CapturedEffect = {
+  square: string;
+  type: PieceType;
+  color: PieceColor;
+};
+
+type TrackedPiece = {
+  id: string;
+  square: string;
+  type: PieceType;
+  color: PieceColor;
+  col: number;
+  row: number;
+};
+
 type Props = {
   fen: string;
   orientation?: "w" | "b";
@@ -41,6 +56,12 @@ export function ChessBoard({
   const [arrows, setArrows] = useState<Arrow[]>([]);
   const rightClickStartRef = useRef<string | null>(null);
 
+  // Animation & Impact Effect States
+  const [capturedEffect, setCapturedEffect] = useState<CapturedEffect | null>(null);
+  const [isShuddering, setIsShuddering] = useState(false);
+  const pieceIdMapRef = useRef<Map<string, string>>(new Map());
+  const nextPieceIdRef = useRef<number>(1);
+
   const { settings } = useSettings();
   const prevFenRef = useRef(fen);
 
@@ -58,23 +79,128 @@ export function ChessBoard({
   const canMoveNow = interactive && (myColor === null || myColor === turn);
   const isOpponentTurn = interactive && myColor !== null && myColor !== turn;
 
-  // Sound triggers & Premove Execution on FEN change
+  const board = chess.board();
+
+  // Coordinates mapping based on orientation
+  const fileLabels = useMemo(
+    () => (orientation === "w" ? FILES : [...FILES].reverse()),
+    [orientation],
+  );
+  const rankLabels = useMemo(
+    () => (orientation === "w" ? RANKS : [...RANKS].reverse()),
+    [orientation],
+  );
+
+  // Track piece IDs across board updates to maintain DOM node continuity for CSS transitions
+  const trackedPieces = useMemo<TrackedPiece[]>(() => {
+    const newIdMap = new Map<string, string>();
+    const oldIdMap = pieceIdMapRef.current;
+    const result: TrackedPiece[] = [];
+
+    // Helper to get or assign piece ID
+    const assignPieceId = (square: string, type: PieceType, color: PieceColor, fromSq?: string) => {
+      let pieceId = fromSq ? oldIdMap.get(fromSq) : oldIdMap.get(square);
+      if (!pieceId) {
+        pieceId = `${color}-${type}-${nextPieceIdRef.current++}`;
+      }
+      newIdMap.set(square, pieceId);
+      return pieceId;
+    };
+
+    // If lastMove exists, check for castling or standard moves to map IDs smoothly
+    const moveFrom = lastMove?.from;
+    const moveTo = lastMove?.to;
+    let castleRookFrom: string | undefined;
+    let castleRookTo: string | undefined;
+
+    if (moveFrom && moveTo) {
+      if (moveFrom === "e1" && moveTo === "g1") {
+        castleRookFrom = "h1";
+        castleRookTo = "f1";
+      } else if (moveFrom === "e1" && moveTo === "c1") {
+        castleRookFrom = "a1";
+        castleRookTo = "d1";
+      } else if (moveFrom === "e8" && moveTo === "g8") {
+        castleRookFrom = "h8";
+        castleRookTo = "f8";
+      } else if (moveFrom === "e8" && moveTo === "c8") {
+        castleRookFrom = "a8";
+        castleRookTo = "d8";
+      }
+    }
+
+    board.forEach((rowCells, rIdx) => {
+      rowCells.forEach((cell, cIdx) => {
+        if (!cell) return;
+        const file = FILES[cIdx]!;
+        const rank = RANKS[rIdx]!;
+        const square = `${file}${rank}`;
+        const color = cell.color as PieceColor;
+        const type = cell.type as PieceType;
+
+        let fromSquare: string | undefined;
+        if (square === moveTo) {
+          fromSquare = moveFrom;
+        } else if (castleRookTo && square === castleRookTo) {
+          fromSquare = castleRookFrom;
+        }
+
+        const id = assignPieceId(square, type, color, fromSquare);
+        const col = fileLabels.indexOf(file as (typeof FILES)[number]);
+        const row = rankLabels.indexOf(rank as (typeof RANKS)[number]);
+
+        result.push({ id, square, type, color, col, row });
+      });
+    });
+
+    pieceIdMapRef.current = newIdMap;
+    return result;
+  }, [board, lastMove, fileLabels, rankLabels]);
+
+  // Sound triggers, capture animation, & Premove Execution on FEN change
   useEffect(() => {
     if (prevFenRef.current && prevFenRef.current !== fen) {
-      if (settings.sounds) {
-        const last = chess.history({ verbose: true }).pop();
+      const history = chess.history({ verbose: true });
+      const last = history[history.length - 1];
+
+      if (last?.captured) {
+        setCapturedEffect({
+          square: last.to,
+          type: last.captured as PieceType,
+          color: last.color === "w" ? "b" : "w",
+        });
+        setIsShuddering(true);
+
+        const timer1 = setTimeout(() => setIsShuddering(false), 180);
+        const timer2 = setTimeout(() => setCapturedEffect(null), 350);
+
+        // Sound handling for capture
+        if (settings.sounds) {
+          if (chess.isCheckmate()) {
+            playMoveSound(settings.volume, myColor === turn ? "defeat" : "victory");
+          } else if (chess.inCheck()) {
+            playMoveSound(settings.volume, "check");
+          } else {
+            playMoveSound(settings.volume, "capture");
+          }
+        }
+
+        return () => {
+          clearTimeout(timer1);
+          clearTimeout(timer2);
+        };
+      } else if (settings.sounds) {
         if (chess.isCheckmate()) {
           playMoveSound(settings.volume, myColor === turn ? "defeat" : "victory");
         } else if (chess.inCheck()) {
           playMoveSound(settings.volume, "check");
         } else if (last?.san === "O-O" || last?.san === "O-O-O") {
           playMoveSound(settings.volume, "castle");
-        } else if (last?.captured) {
-          playMoveSound(settings.volume, "capture");
         } else {
           playMoveSound(settings.volume, "move");
         }
       }
+
       // Execute queued premove if it's now our turn
       if (premove && myColor === turn) {
         const pMove = premove;
@@ -97,8 +223,6 @@ export function ChessBoard({
     prevFenRef.current = fen;
   }, [fen, settings.sounds, settings.volume, premove, myColor, turn, chess, onMove]);
 
-  const board = chess.board();
-
   const legalTargets = useMemo(() => {
     if (!selected) return new Map<string, boolean>();
     const map = new Map<string, boolean>();
@@ -119,8 +243,6 @@ export function ChessBoard({
   }, [chess, turn]);
 
   const rows = orientation === "w" ? board : [...board].reverse().map((r) => [...r].reverse());
-  const fileLabels = orientation === "w" ? FILES : [...FILES].reverse();
-  const rankLabels = orientation === "w" ? RANKS : [...RANKS].reverse();
 
   function clearAnnotations() {
     if (highlightedSquares.size > 0 || arrows.length > 0) {
@@ -182,7 +304,6 @@ export function ChessBoard({
   // Right click square annotation handlers
   function handleMouseDown(event: React.MouseEvent, square: string) {
     if (event.button === 2) {
-      // Right click
       rightClickStartRef.current = square;
     }
   }
@@ -194,7 +315,6 @@ export function ChessBoard({
       if (!start) return;
 
       if (start === square) {
-        // Toggle square highlight
         setHighlightedSquares((prev) => {
           const next = new Set(prev);
           if (next.has(square)) next.delete(square);
@@ -202,7 +322,6 @@ export function ChessBoard({
           return next;
         });
       } else {
-        // Toggle arrow
         setArrows((prev) => {
           const exists = prev.some((a) => a.from === start && a.to === square);
           if (exists) return prev.filter((a) => !(a.from === start && a.to === square));
@@ -212,7 +331,6 @@ export function ChessBoard({
     }
   }
 
-  // Coordinates helper for rendering SVG arrows
   function getSquareCenter(sq: string) {
     const file = sq[0]!;
     const rank = sq[1]!;
@@ -223,13 +341,25 @@ export function ChessBoard({
     return { x, y };
   }
 
+  const animDurationMs = settings.pieceAnimations
+    ? settings.animationSpeed === "fast"
+      ? 140
+      : settings.animationSpeed === "slow"
+        ? 300
+        : 200
+    : 0;
+
   return (
-    <div className="relative w-full aspect-square" data-board-theme={settings.boardTheme}>
+    <div
+      className={cn("relative w-full aspect-square", isShuddering && "animate-board-shudder")}
+      data-board-theme={settings.boardTheme}
+    >
       <div className="h-full w-full rounded-2xl bg-board-frame p-2 shadow-plate sm:p-3">
         <div
           className="relative grid grid-cols-8 aspect-square h-full w-full overflow-hidden rounded-lg"
           onContextMenu={(e) => e.preventDefault()}
         >
+          {/* Base Grid Layer: Squares, Highlights, Coordinates & Click Handlers */}
           {rows.map((row, rowIndex) =>
             row.map((cell, colIndex) => {
               const file = fileLabels[colIndex]!;
@@ -281,23 +411,15 @@ export function ChessBoard({
                     <span className="absolute inset-0 bg-check [mask-image:radial-gradient(circle,black,transparent_72%)]" />
                   )}
                   {target !== undefined && !cell && (
-                    <span className="absolute h-[22%] w-[22%] rounded-full bg-accent/70" />
+                    <span className="absolute h-[22%] w-[22%] rounded-full bg-accent/70 animate-pulse" />
                   )}
                   {target !== undefined && cell && (
                     <span className="absolute inset-[6%] rounded-full border-4 border-accent/80" />
                   )}
-                  {cell && (
-                    <ChessPiece
-                      type={cell.type as PieceType}
-                      color={cell.color as PieceColor}
-                      style={settings.pieceStyle}
-                      className="p-1"
-                    />
-                  )}
                   {showCoordinates && colIndex === 0 && (
                     <span
                       className={cn(
-                        "absolute left-0.5 top-0.5 text-[0.55rem] font-semibold select-none",
+                        "absolute left-0.5 top-0.5 text-[0.55rem] font-semibold select-none pointer-events-none z-10",
                         isDark ? "text-board-light/70" : "text-board-dark/70",
                       )}
                     >
@@ -307,7 +429,7 @@ export function ChessBoard({
                   {showCoordinates && rowIndex === 7 && (
                     <span
                       className={cn(
-                        "absolute bottom-0.5 right-1 text-[0.55rem] font-semibold select-none",
+                        "absolute bottom-0.5 right-1 text-[0.55rem] font-semibold select-none pointer-events-none z-10",
                         isDark ? "text-board-light/70" : "text-board-dark/70",
                       )}
                     >
@@ -319,10 +441,77 @@ export function ChessBoard({
             }),
           )}
 
+          {/* Absolute Animated Piece & Capture Layer */}
+          <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+            {/* Capture Shockwave & Particle Dissolve Overlay */}
+            {capturedEffect &&
+              (() => {
+                const file = capturedEffect.square[0]!;
+                const rank = capturedEffect.square[1]!;
+                const capCol = fileLabels.indexOf(file as (typeof FILES)[number]);
+                const capRow = rankLabels.indexOf(rank as (typeof RANKS)[number]);
+
+                if (capCol === -1 || capRow === -1) return null;
+
+                return (
+                  <div
+                    key={`cap-${capturedEffect.square}`}
+                    className="absolute pointer-events-none flex items-center justify-center p-1"
+                    style={{
+                      left: `${capCol * 12.5}%`,
+                      top: `${capRow * 12.5}%`,
+                      width: "12.5%",
+                      height: "12.5%",
+                    }}
+                  >
+                    <span className="absolute inset-0 rounded-full border-2 border-amber-400 bg-amber-400/25 animate-shockwave" />
+                    <div className="h-full w-full animate-capture">
+                      <ChessPiece
+                        type={capturedEffect.type}
+                        color={capturedEffect.color}
+                        style={settings.pieceStyle}
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+
+            {/* Smooth Sliding Active Pieces Layer */}
+            {trackedPieces.map((p) => {
+              const isSelected = selected === p.square;
+
+              return (
+                <div
+                  key={p.id}
+                  className="absolute p-1 pointer-events-none transition-all ease-out will-change-transform flex items-center justify-center"
+                  style={{
+                    left: `${p.col * 12.5}%`,
+                    top: `${p.row * 12.5}%`,
+                    width: "12.5%",
+                    height: "12.5%",
+                    transitionDuration: `${animDurationMs}ms`,
+                    transitionProperty: animDurationMs > 0 ? "top, left, transform" : "none",
+                  }}
+                >
+                  <ChessPiece
+                    type={p.type}
+                    color={p.color}
+                    style={settings.pieceStyle}
+                    className={cn(
+                      "transition-transform duration-150",
+                      isSelected &&
+                        "scale-110 -translate-y-1 drop-shadow-[0_0_15px_oklch(0.79_0.14_78/0.85)]",
+                    )}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
           {/* SVG Arrow Annotations Overlay */}
           {arrows.length > 0 && (
             <svg
-              className="pointer-events-none absolute inset-0 z-10 h-full w-full"
+              className="pointer-events-none absolute inset-0 z-20 h-full w-full"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
             >
@@ -361,7 +550,7 @@ export function ChessBoard({
 
       {/* Pawn Promotion Modal */}
       {pending && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-ink/70 p-4">
+        <div className="absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-ink/70 p-4">
           <div className="paper w-full max-w-xs p-5 text-center">
             <p className="eyebrow text-muted-foreground">Promote to</p>
             <div className="mt-4 flex justify-center gap-2">

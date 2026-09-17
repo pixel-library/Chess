@@ -12,6 +12,8 @@ export const BOARD_THEMES: { id: BoardTheme; label: string }[] = [
   { id: "slate", label: "Slate Grey" },
 ];
 
+export type AnimationSpeed = "fast" | "normal" | "slow";
+
 export type Settings = {
   boardTheme: BoardTheme;
   pieceStyle: PieceStyle;
@@ -20,6 +22,8 @@ export type Settings = {
   volume: number;
   premoves: boolean;
   annotations: boolean;
+  pieceAnimations: boolean;
+  animationSpeed: AnimationSpeed;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -30,6 +34,8 @@ export const DEFAULT_SETTINGS: Settings = {
   volume: 0.5,
   premoves: true,
   annotations: true,
+  pieceAnimations: true,
+  animationSpeed: "normal",
 };
 
 const STORAGE_KEY = "chess.settings";
