@@ -112,6 +112,7 @@ function GamePage() {
   const recordedRef = useRef(false);
   const timeoutRef = useRef(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const chatScrollRef = useRef<HTMLDivElement | null>(null);
 
   const move = useServerFn(makeMove);
   const resign = useServerFn(resignGame);
@@ -177,6 +178,12 @@ function GamePage() {
   });
   const messages = chatQuery.data ?? [];
 
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [messages.length]);
+
   // Seat: stored credentials, or auto-join when a seat is free (invite links).
   useEffect(() => {
     const stored = loadCredentials(code);
@@ -219,8 +226,17 @@ function GamePage() {
         void queryClient.invalidateQueries({ queryKey: ["game", code] });
         void queryClient.invalidateQueries({ queryKey: ["game-moves", gameId] });
       })
-      .on("broadcast", { event: "chat" }, () => {
-        void queryClient.invalidateQueries({ queryKey: ["game-chat", gameId] });
+      .on("broadcast", { event: "chat" }, (payload) => {
+        const newMsg = payload["payload"] as ChatRow | undefined;
+        if (newMsg && newMsg.body) {
+          queryClient.setQueryData<ChatRow[]>(["game-chat", gameId], (old) => {
+            const list = old ?? [];
+            if (newMsg.id && list.some((m) => m.id === newMsg.id)) return list;
+            return [...list, newMsg];
+          });
+        } else {
+          void queryClient.invalidateQueries({ queryKey: ["game-chat", gameId] });
+        }
       })
       .on(
         "postgres_changes",
@@ -801,7 +817,7 @@ function GamePage() {
 
           <div className="paper flex flex-col p-4">
             <p className="eyebrow text-muted-foreground">Chat</p>
-            <div className="mt-3 max-h-52 min-h-24 flex-1 space-y-2 overflow-y-auto text-sm">
+            <div ref={chatScrollRef} className="mt-3 max-h-52 min-h-24 flex-1 space-y-2 overflow-y-auto text-sm">
               {messages.length === 0 && (
                 <p className="text-muted-foreground">Say hello. Keep it friendly.</p>
               )}
@@ -815,22 +831,44 @@ function GamePage() {
             {creds && (
               <form
                 className="mt-3 flex gap-2"
-                onSubmit={async (event) => {
+                onSubmit={(event) => {
                   event.preventDefault();
                   const body = draft.trim();
-                  if (!body) return;
+                  if (!body || !game) return;
                   setDraft("");
-                  try {
-                    channelRef.current?.send({
-                      type: "broadcast",
-                      event: "chat",
-                      payload: { body },
-                    });
-                    await chat({ data: { code, token: creds.token, body } });
-                    await queryClient.invalidateQueries({ queryKey: ["game-chat", game.id] });
-                  } catch (error) {
-                    toast.error(error instanceof Error ? error.message : "Message not sent");
-                  }
+                  
+                  const senderName =
+                    (creds.color === "w" ? game.white_name : game.black_name) || getPlayerName() || "Player";
+                  
+                  const newMsg: ChatRow = {
+                    id: "temp-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7),
+                    sender_name: senderName,
+                    sender_color: creds.color,
+                    body,
+                    created_at: new Date().toISOString(),
+                  };
+
+                  // 1. Optimistic local cache update (0ms UI latency for sender)
+                  queryClient.setQueryData<ChatRow[]>(["game-chat", game.id], (old) => [
+                    ...(old ?? []),
+                    newMsg,
+                  ]);
+
+                  // 2. Direct WebSocket broadcast to opponent (0ms latency for receiver)
+                  channelRef.current?.send({
+                    type: "broadcast",
+                    event: "chat",
+                    payload: newMsg,
+                  });
+
+                  // 3. Persist to DB in background
+                  void (async () => {
+                    try {
+                      await chat({ data: { code, token: creds.token, body } });
+                    } catch (error) {
+                      toast.error(error instanceof Error ? error.message : "Message not sent");
+                    }
+                  })();
                 }}
               >
                 <Input
