@@ -81,17 +81,9 @@ function Landing() {
             <div className="absolute bottom-10 left-1/4 h-16 w-16 animate-float-reverse filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]">
               <ChessPiece type="n" color="b" style="geometric" />
             </div>
-            <div className="absolute top-12 right-12 h-20 w-20 animate-float-slow filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]">
-              <ChessPiece type="r" color="w" style="geometric" />
-            </div>
           </div>
 
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-bold text-accent shadow-sm">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Obsidian Gold & 3D Stage</span>
-            </div>
-
             <h1 className="font-editorial mt-5 text-[clamp(2.3rem,8vw,5.2rem)] font-black tracking-tight leading-[0.95] text-foreground">
               Master the board.
               <br />
