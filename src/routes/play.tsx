@@ -78,7 +78,14 @@ function PlayPage() {
 
   const publicRoomsQuery = useQuery({
     queryKey: ["public-rooms"],
-    queryFn: () => fetchPublic(),
+    queryFn: async () => {
+      try {
+        return await fetchPublic();
+      } catch (error) {
+        console.error("Failed to load public rooms:", error);
+        return [];
+      }
+    },
     refetchInterval: 5000,
   });
 

@@ -23,8 +23,13 @@ export function getSessionId(): string {
 }
 
 export function getPlayerName(): string {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem(NAME_KEY) ?? "";
+  if (typeof window === "undefined") return "Player";
+  let name = localStorage.getItem(NAME_KEY);
+  if (!name || !name.trim()) {
+    name = `Player_${Math.floor(1000 + Math.random() * 9000)}`;
+    localStorage.setItem(NAME_KEY, name);
+  }
+  return name;
 }
 
 export function setPlayerName(name: string) {
