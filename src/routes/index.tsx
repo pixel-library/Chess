@@ -140,28 +140,9 @@ function Landing() {
             </div>
           </div>
 
-          {/* Hero Showcase: Interactive 3D Board & Image 2 Split Queen Artwork */}
-          <div className="relative mx-auto grid w-full max-w-md lg:max-w-none gap-6 grid-cols-1 lg:grid-cols-1 z-10">
-            <div className="relative">
-              <div
-                className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-amber-500/25 via-amber-400/10 to-transparent blur-2xl"
-                aria-hidden
-              />
-              <div className="relative glass-card overflow-hidden p-2.5 sm:p-3.5 shadow-2xl border-amber-500/20">
-                <div className="mb-2.5 flex items-center justify-between px-2">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse" />
-                    <span className="font-editorial text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-                      Interactive 3D Stage (Move Mouse to Tilt)
-                    </span>
-                  </div>
-                  <span className="text-[0.65rem] font-mono font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
-                    Giuoco Piano
-                  </span>
-                </div>
-                <ChessBoard fen={INITIAL_DEMO_FEN} interactive={true} showCoordinates={true} />
-              </div>
-            </div>
+          {/* Hero Showcase: Clean Transparent 3D Chessboard */}
+          <div className="relative mx-auto w-full max-w-md lg:max-w-none z-10">
+            <ChessBoard fen={INITIAL_DEMO_FEN} interactive={true} showCoordinates={true} />
           </div>
         </section>
 

@@ -14,6 +14,13 @@ export const BOARD_THEMES: { id: BoardTheme; label: string }[] = [
   { id: "slate", label: "Slate Grey" },
 ];
 
+export const PIECE_STYLES: { id: PieceStyle; label: string }[] = [
+  { id: "geometric", label: "Geometric Luxe" },
+  { id: "staunton", label: "Staunton Vector" },
+  { id: "neo", label: "Neo Vector" },
+  { id: "glyph", label: "Classic Glyph" },
+];
+
 export type AnimationSpeed = "fast" | "normal" | "slow";
 
 export type Settings = {

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Box, Eye, Palette, Sparkles, Volume2, VolumeX } from "lucide-react";
 
 import { ChessPiece, type PieceType, type PieceColor } from "@/components/ChessPieces";
-import { BOARD_THEMES, type PieceStyle, useSettings } from "@/lib/settings";
+import { BOARD_THEMES, PIECE_STYLES, type PieceStyle, useSettings } from "@/lib/settings";
 import { playMoveSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 
@@ -688,18 +688,13 @@ export function ChessBoard({
 
           <button
             type="button"
-            onClick={() =>
-              updateSettings({
-                pieceStyle:
-                  settings.pieceStyle === "geometric"
-                    ? "staunton"
-                    : settings.pieceStyle === "staunton"
-                      ? "neo"
-                      : "geometric",
-              })
-            }
+            onClick={() => {
+              const currentIdx = PIECE_STYLES.findIndex((p) => p.id === settings.pieceStyle);
+              const nextStyle = PIECE_STYLES[(currentIdx + 1) % PIECE_STYLES.length]!;
+              updateSettings({ pieceStyle: nextStyle.id });
+            }}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-accent hover:text-foreground font-medium transition-all"
-            title="Switch Piece Style"
+            title="Switch Piece Style (Geometric, Staunton, Neo, Glyph)"
           >
             <Sparkles className="h-3.5 w-3.5 text-amber-400" />
             <span className="capitalize">{settings.pieceStyle}</span>

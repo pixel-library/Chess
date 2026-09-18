@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, Moon, Palette, Sun, Volume2, VolumeX, X } from "lucide-react";
+import { Menu, Moon, Palette, Sparkles, Sun, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BOARD_THEMES, useSettings, type BoardTheme } from "@/lib/settings";
+import {
+  BOARD_THEMES,
+  PIECE_STYLES,
+  useSettings,
+  type BoardTheme,
+  type PieceStyle,
+} from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -81,6 +87,34 @@ export function SiteHeader() {
           >
             {settings.sounds ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
           </Button>
+
+          {/* Piece Style Switcher */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                title="Change piece style"
+              >
+                <Sparkles className="h-4 w-4 text-amber-400" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              {PIECE_STYLES.map((style) => (
+                <DropdownMenuItem
+                  key={style.id}
+                  onClick={() => update({ pieceStyle: style.id as PieceStyle })}
+                  className={cn(
+                    "capitalize cursor-pointer",
+                    settings.pieceStyle === style.id && "font-bold text-accent",
+                  )}
+                >
+                  {style.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Board Theme Switcher */}
           <DropdownMenu>
