@@ -50,8 +50,8 @@ const FEATURES = [
   },
   {
     icon: Sparkles,
-    title: "Pro Themes & 3D Stage",
-    body: "Obsidian Gold stage lighting, 3D tilt perspective mode, and Geometric Luxe piece styles.",
+    title: "Pro Themes & Customization",
+    body: "Custom board themes, tilt perspective mode, and Geometric Luxe piece styles.",
   },
   {
     icon: ShieldCheck,
@@ -93,8 +93,8 @@ function Landing() {
             </h1>
 
             <p className="mt-5 max-w-lg text-sm text-muted-foreground sm:text-lg leading-relaxed font-sans">
-              Experience browser chess engineered for luxury and performance. Tilted 3D stage
-              lighting, geometric gold pieces, live stockfish evaluation, and sub-millisecond
+              Experience browser chess engineered for luxury and performance. Custom board
+              themes, geometric gold pieces, live stockfish evaluation, and sub-millisecond
               multiplayer.
             </p>
 
