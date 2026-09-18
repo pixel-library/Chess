@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Chess } from "chess.js";
+import { Lightbulb, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ChessBoard, type BoardMove } from "@/components/ChessBoard";
@@ -7,7 +8,8 @@ import { EvalBar } from "@/components/EvalBar";
 import { PlayerBar } from "@/components/PlayerBar";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
-import { DIFFICULTIES, resultText } from "@/lib/chess-shared";
+import { DIFFICULTIES } from "@/lib/chess-shared";
+import { getOpeningName } from "@/lib/opening-book";
 import { useSettings, type BoardTheme, type PieceStyle } from "@/lib/settings";
 import { useStockfish } from "@/lib/useStockfish";
 import { cn } from "@/lib/utils";
@@ -37,6 +39,7 @@ function ComputerPage() {
   const [fen, setFen] = useState(chess.fen());
   const [history, setHistory] = useState<string[]>([]);
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
+  const [hintArrow, setHintArrow] = useState<{ from: string; to: string } | null>(null);
   const [myColor, setMyColor] = useState<"w" | "b">("w");
   const [level, setLevel] = useState(2);
   const [status, setStatus] = useState<{ result: string | null; reason: string | null }>({
@@ -50,10 +53,13 @@ function ComputerPage() {
   const engineColor = myColor === "w" ? "b" : "w";
   const busyRef = useRef(false);
 
+  const openingInfo = useMemo(() => getOpeningName(history), [history]);
+
   const sync = useCallback(() => {
     const currentFen = chess.fen();
     setFen(currentFen);
     setHistory(chess.history());
+    setHintArrow(null);
     if (chess.isCheckmate()) {
       setStatus({ result: chess.turn() === "w" ? "0-1" : "1-0", reason: "checkmate" });
     } else if (chess.isDraw() || chess.isStalemate()) {
@@ -105,11 +111,26 @@ function ComputerPage() {
     sync();
   }
 
+  function getHint() {
+    if (thinking || chess.turn() !== myColor || status.result) return;
+    requestMove({
+      fen: chess.fen(),
+      depth: Math.max(12, difficulty.depth),
+      skill: 20, // Full engine strength for hint
+      onBestMove: (uci) => {
+        const from = uci.slice(0, 2);
+        const to = uci.slice(2, 4);
+        setHintArrow({ from, to });
+      },
+    });
+  }
+
   function newGame(color: "w" | "b" = myColor) {
     stop();
     chess.reset();
     setMyColor(color);
     setLastMove(null);
+    setHintArrow(null);
     setStatus({ result: null, reason: null });
     busyRef.current = false;
     sync();
@@ -122,9 +143,25 @@ function ComputerPage() {
     chess.undo(); // Undo user move
     setStatus({ result: null, reason: null });
     setLastMove(null);
+    setHintArrow(null);
     busyRef.current = false;
     sync();
   }
+
+  // Keyboard navigation shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === "f" || e.key === "F") {
+        setMyColor((c) => (c === "w" ? "b" : "w"));
+      } else if (e.key === "Escape") {
+        setHintArrow(null);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const pairs = useMemo(() => {
     const list: { no: number; white?: string; black?: string }[] = [];
@@ -142,6 +179,17 @@ function ComputerPage() {
       <main className="mx-auto grid max-w-6xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:py-3 lg:items-start">
         <div className="flex flex-col items-center lg:items-stretch">
           <div className="w-full max-w-[min(100%,calc(100vh-165px))] mx-auto">
+            {/* Opening Badge */}
+            {openingInfo && (
+              <div className="mb-2 flex items-center justify-between px-1">
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-accent/15 px-2.5 py-1 font-mono text-xs font-bold text-accent">
+                  <span className="opacity-75">{openingInfo.eco}</span>
+                  <span>{openingInfo.name}</span>
+                </span>
+                <span className="text-[0.65rem] text-muted-foreground">Press F to flip board</span>
+              </div>
+            )}
+
             {/* Top Player (Engine) */}
             <PlayerBar
               name={`Stockfish ${difficulty.label}`}
@@ -164,6 +212,7 @@ function ComputerPage() {
                   orientation={myColor}
                   myColor={myColor}
                   lastMove={lastMove}
+                  customArrows={hintArrow ? [hintArrow] : []}
                   interactive={!status.result && chess.turn() === myColor && !thinking}
                   onMove={handleMove}
                 />
@@ -200,6 +249,44 @@ function ComputerPage() {
                   {option.label}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="paper p-5">
+            <p className="eyebrow text-muted-foreground">Game Controls</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => newGame("w")}>
+                New as White
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => newGame("b")}>
+                New as Black
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={getHint}
+                disabled={thinking || chess.turn() !== myColor || Boolean(status.result)}
+                className="gap-1.5 font-bold"
+              >
+                <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
+                Hint
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={undo}
+                disabled={history.length < 2 || thinking}
+              >
+                Undo
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setMyColor((c) => (c === "w" ? "b" : "w"))}
+                title="Flip board (Hotkey: F)"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </Button>
             </div>
           </div>
 

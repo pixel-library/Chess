@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import { Chess } from "chess.js";
 import { ChessBoard, type BoardMove } from "@/components/ChessBoard";
+import { EvalBar } from "@/components/EvalBar";
 import { PlayerBar } from "@/components/PlayerBar";
 import { notifyTurn, requestNotificationPermission, resetTitle } from "@/lib/notifications";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -23,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { formatClock, resultText } from "@/lib/chess-shared";
+import { getOpeningName } from "@/lib/opening-book";
+import { useStockfish } from "@/lib/useStockfish";
 import {
   claimTimeout,
   drawAction,
@@ -154,7 +157,8 @@ function GamePage() {
       return (data ?? []) as MoveRow[];
     },
   });
-  const moves = movesQuery.data ?? [];
+  const rawMoves = movesQuery.data;
+  const moves = useMemo(() => rawMoves ?? [], [rawMoves]);
 
   const chatQuery = useQuery({
     queryKey: ["game-chat", game?.id],
@@ -318,6 +322,11 @@ function GamePage() {
     }
   }, [game, creds]);
 
+  const { evaluation, evaluatePosition } = useStockfish();
+
+  const moveSans = useMemo(() => moves.map((m) => m.san), [moves]);
+  const openingInfo = useMemo(() => getOpeningName(moveSans), [moveSans]);
+
   const displayFen = useMemo(() => {
     if (reviewPly !== null) {
       const entry = moves[reviewPly];
@@ -325,6 +334,40 @@ function GamePage() {
     }
     return optimisticFen ?? game?.fen ?? "";
   }, [reviewPly, moves, game?.fen, optimisticFen]);
+
+  // Run engine evaluation during move replay or when game is finished
+  useEffect(() => {
+    if (displayFen && (reviewPly !== null || game?.status === "finished")) {
+      evaluatePosition(displayFen, 12);
+    }
+  }, [displayFen, reviewPly, game?.status, evaluatePosition]);
+
+  // Keyboard navigation shortcuts (Left/Right arrows, Up/Down, F flip)
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === "ArrowLeft") {
+        setReviewPly((p) => {
+          const current = p ?? moves.length - 1;
+          return Math.max(0, current - 1);
+        });
+      } else if (e.key === "ArrowRight") {
+        setReviewPly((p) => {
+          if (p === null || p >= moves.length - 1) return null;
+          return p + 1 === moves.length - 1 ? null : p + 1;
+        });
+      } else if (e.key === "ArrowUp") {
+        if (moves.length > 0) setReviewPly(0);
+      } else if (e.key === "ArrowDown" || e.key === "Escape") {
+        setReviewPly(null);
+      } else if (e.key === "f" || e.key === "F") {
+        setFlipped((f) => !f);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [moves.length]);
 
   const lastMoveSquares = useMemo(() => {
     if (reviewPly !== null) {
@@ -488,6 +531,17 @@ function GamePage() {
       <main className="mx-auto grid max-w-6xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:py-3 lg:items-start">
         <div className="flex flex-col items-center lg:items-stretch">
           <div className="w-full max-w-[min(100%,calc(100vh-165px))] mx-auto">
+            {/* Opening Badge */}
+            {openingInfo && (
+              <div className="mb-2 flex items-center justify-between px-1">
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-accent/15 px-2.5 py-1 font-mono text-xs font-bold text-accent">
+                  <span className="opacity-75">{openingInfo.eco}</span>
+                  <span>{openingInfo.name}</span>
+                </span>
+                <span className="text-[0.65rem] text-muted-foreground">Press F to flip board</span>
+              </div>
+            )}
+
             <PlayerBar
               name={(topColor === "w" ? game.white_name : game.black_name) ?? "Waiting…"}
               color={topColor}
@@ -495,16 +549,27 @@ function GamePage() {
               active={game.status === "active" && game.turn === topColor}
               fen={displayFen}
             />
-            <div className="my-1.5">
-              <ChessBoard
-                fen={displayFen}
-                orientation={orientation}
-                myColor={creds?.color ?? null}
-                lastMove={lastMoveSquares}
-                interactive={Boolean(creds) && game.status === "active" && !reviewing}
-                onMove={handleMove}
-              />
+
+            <div className="my-1.5 flex gap-2.5">
+              {(reviewing || game.status === "finished") && (
+                <EvalBar
+                  evaluation={evaluation}
+                  turn={game.turn as "w" | "b"}
+                  orientation={orientation}
+                />
+              )}
+              <div className="flex-1">
+                <ChessBoard
+                  fen={displayFen}
+                  orientation={orientation}
+                  myColor={creds?.color ?? null}
+                  lastMove={lastMoveSquares}
+                  interactive={Boolean(creds) && game.status === "active" && !reviewing}
+                  onMove={handleMove}
+                />
+              </div>
             </div>
+
             <PlayerBar
               name={(orientation === "w" ? game.white_name : game.black_name) ?? "Waiting…"}
               color={orientation}

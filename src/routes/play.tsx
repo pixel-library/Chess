@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, Globe, Lock, RefreshCw, Users } from "lucide-react";
+import { Copy, Globe, Lock, RefreshCw, Users, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -12,7 +12,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TIME_CONTROLS } from "@/lib/chess-shared";
-import { createGame, getPublicRooms, joinGame } from "@/lib/chess.functions";
+import {
+  createGame,
+  getPublicRooms,
+  joinGame,
+  leaveQueue,
+  pollQueue,
+  quickMatch,
+} from "@/lib/chess.functions";
 import {
   getPlayerName,
   getRecentGames,
@@ -59,10 +66,15 @@ function PlayPage() {
   const [isPublic, setIsPublic] = useState(true);
   const [joinCode, setJoinCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [queueSeconds, setQueueSeconds] = useState(0);
 
   const create = useServerFn(createGame);
   const join = useServerFn(joinGame);
   const fetchPublic = useServerFn(getPublicRooms);
+  const findMatch = useServerFn(quickMatch);
+  const checkQueue = useServerFn(pollQueue);
+  const exitQueue = useServerFn(leaveQueue);
 
   const publicRoomsQuery = useQuery({
     queryKey: ["public-rooms"],
@@ -81,10 +93,60 @@ function PlayPage() {
     }
   }, []);
 
-  function enterGame(creds: { code: string; color: "w" | "b"; token: string }) {
-    saveCredentials(creds);
-    router.invalidate();
-    navigate({ to: "/game/$code", params: { code: creds.code } });
+  const enterGame = useCallback(
+    (creds: { code: string; color: "w" | "b"; token: string }) => {
+      saveCredentials(creds);
+      router.invalidate();
+      navigate({ to: "/game/$code", params: { code: creds.code } });
+    },
+    [navigate, router],
+  );
+
+  // Poll matchmaking queue when searching is active
+  useEffect(() => {
+    if (!searching || !sessionId) return;
+    const timer = setInterval(() => {
+      setQueueSeconds((s) => s + 1);
+      void (async () => {
+        try {
+          const res = await checkQueue({ data: { sessionId } });
+          if (res.matched && res.code) {
+            setSearching(false);
+            enterGame({ code: res.code, color: res.color, token: res.token });
+          }
+        } catch {
+          /* ignore polling error */
+        }
+      })();
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, [searching, sessionId, checkQueue, enterGame]);
+
+  async function handleQuickMatch() {
+    setBusy(true);
+    setQueueSeconds(0);
+    try {
+      const res = await findMatch({ data: { name, sessionId, minutes, increment, rated } });
+      if (res.matched && res.code) {
+        enterGame({ code: res.code, color: res.color, token: res.token });
+      } else {
+        setSearching(true);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Quick Match failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleCancelQueue() {
+    setSearching(false);
+    try {
+      await exitQueue({ data: { sessionId } });
+    } catch {
+      /* ignore cancel error */
+    }
   }
 
   async function handleCreate() {
@@ -173,8 +235,36 @@ function PlayPage() {
           </Button>
         </div>
 
-        <Tabs defaultValue="create" className="mt-8">
-          <TabsList className="grid w-full grid-cols-3">
+        {/* Matchmaking Queue Overlay */}
+        {searching && (
+          <div className="paper mt-6 flex flex-col items-center justify-center p-8 text-center animate-fade-in border-accent/50 bg-accent/5">
+            <div className="relative flex h-16 w-16 items-center justify-center">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent/40 opacity-75" />
+              <span className="relative inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg">
+                <Zap className="h-6 w-6" />
+              </span>
+            </div>
+            <h3 className="display-xl mt-4 text-2xl font-bold">Searching for an opponent...</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {minutes}+{increment} · {rated ? "Rated" : "Casual"} · Time in queue: {queueSeconds}s
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCancelQueue}
+              className="mt-5 font-bold"
+            >
+              Cancel Search
+            </Button>
+          </div>
+        )}
+
+        <Tabs defaultValue="quick" className="mt-8">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="quick" className="font-bold gap-1.5">
+              <Zap className="h-3.5 w-3.5 text-amber-400" />
+              Quick Match
+            </TabsTrigger>
             <TabsTrigger value="create" className="font-bold">
               Create Room
             </TabsTrigger>
@@ -185,6 +275,43 @@ function PlayPage() {
               Join Code
             </TabsTrigger>
           </TabsList>
+
+          {/* Quick Match Tab */}
+          <TabsContent value="quick" className="paper mt-4 p-6">
+            <p className="eyebrow text-muted-foreground">Automated Matchmaking</p>
+            <h3 className="font-display text-lg font-bold">Find an opponent instantly</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Select your preferred time control and jump into a game with players worldwide.
+            </p>
+
+            <div className="mt-6">
+              <TimeControlPicker
+                minutes={minutes}
+                increment={increment}
+                onPick={(m, i) => {
+                  setMinutes(m);
+                  setIncrement(i);
+                }}
+              />
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border/60 pt-4">
+              <div className="flex items-center gap-3">
+                <Switch id="quick-rated" checked={rated} onCheckedChange={setRated} />
+                <Label htmlFor="quick-rated" className="font-semibold">
+                  Rated (session rating)
+                </Label>
+              </div>
+              <Button
+                size="lg"
+                disabled={busy || searching}
+                onClick={handleQuickMatch}
+                className="font-bold gap-2 shadow-lg shadow-amber-500/20"
+              >
+                <Zap className="h-4 w-4" /> Start Quick Match
+              </Button>
+            </div>
+          </TabsContent>
 
           {/* Create Room Tab */}
           <TabsContent value="create" className="paper mt-4 p-6">

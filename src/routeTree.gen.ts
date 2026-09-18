@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as ComputerRouteImport } from './routes/computer'
 import { Route as HowToPlayRouteImport } from './routes/how-to-play'
 import { Route as PlayRouteImport } from './routes/play'
@@ -19,6 +20,11 @@ import { Route as GameCodeRouteImport } from './routes/game.$code'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalysisRoute = AnalysisRouteImport.update({
+  id: '/analysis',
+  path: '/analysis',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComputerRoute = ComputerRouteImport.update({
@@ -49,6 +55,7 @@ const GameCodeRoute = GameCodeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRoute
   '/computer': typeof ComputerRoute
   '/how-to-play': typeof HowToPlayRoute
   '/play': typeof PlayRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRoute
   '/computer': typeof ComputerRoute
   '/how-to-play': typeof HowToPlayRoute
   '/play': typeof PlayRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRoute
   '/computer': typeof ComputerRoute
   '/how-to-play': typeof HowToPlayRoute
   '/play': typeof PlayRoute
@@ -75,12 +84,26 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/computer' | '/how-to-play' | '/play' | '/rules' | '/game/$code'
+    | '/'
+    | '/analysis'
+    | '/computer'
+    | '/how-to-play'
+    | '/play'
+    | '/rules'
+    | '/game/$code'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/computer' | '/how-to-play' | '/play' | '/rules' | '/game/$code'
+  to:
+    | '/'
+    | '/analysis'
+    | '/computer'
+    | '/how-to-play'
+    | '/play'
+    | '/rules'
+    | '/game/$code'
   id:
     | '__root__'
     | '/'
+    | '/analysis'
     | '/computer'
     | '/how-to-play'
     | '/play'
@@ -90,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalysisRoute: typeof AnalysisRoute
   ComputerRoute: typeof ComputerRoute
   HowToPlayRoute: typeof HowToPlayRoute
   PlayRoute: typeof PlayRoute
@@ -104,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analysis': {
+      id: '/analysis'
+      path: '/analysis'
+      fullPath: '/analysis'
+      preLoaderRoute: typeof AnalysisRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/computer': {
@@ -146,6 +177,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalysisRoute: AnalysisRoute,
   ComputerRoute: ComputerRoute,
   HowToPlayRoute: HowToPlayRoute,
   PlayRoute: PlayRoute,

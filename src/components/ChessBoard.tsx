@@ -34,6 +34,7 @@ type Props = {
   interactive?: boolean;
   myColor?: "w" | "b" | null;
   lastMove?: { from: string; to: string } | null;
+  customArrows?: { from: string; to: string; color?: string }[];
   showCoordinates?: boolean;
   onMove?: (move: BoardMove) => void;
 };
@@ -44,6 +45,7 @@ export function ChessBoard({
   interactive = true,
   myColor = null,
   lastMove = null,
+  customArrows = [],
   showCoordinates = true,
   onMove,
 }: Props) {
@@ -509,7 +511,7 @@ export function ChessBoard({
           </div>
 
           {/* SVG Arrow Annotations Overlay */}
-          {arrows.length > 0 && (
+          {(arrows.length > 0 || customArrows.length > 0) && (
             <svg
               className="pointer-events-none absolute inset-0 z-20 h-full w-full"
               viewBox="0 0 100 100"
@@ -526,13 +528,41 @@ export function ChessBoard({
                 >
                   <polygon points="0 0, 4 2, 0 4" fill="oklch(0.79 0.13 78 / 0.85)" />
                 </marker>
+                <marker
+                  id="arrowhead-hint"
+                  markerWidth="4"
+                  markerHeight="4"
+                  refX="2"
+                  refY="2"
+                  orient="auto"
+                >
+                  <polygon points="0 0, 4 2, 0 4" fill="rgb(34 197 94)" />
+                </marker>
               </defs>
+              {customArrows.map((arr, i) => {
+                const p1 = getSquareCenter(arr.from);
+                const p2 = getSquareCenter(arr.to);
+                const strokeColor = arr.color || "rgb(34 197 94)";
+                return (
+                  <line
+                    key={`custom-${i}`}
+                    x1={`${p1.x}%`}
+                    y1={`${p1.y}%`}
+                    x2={`${p2.x}%`}
+                    y2={`${p2.y}%`}
+                    stroke={strokeColor}
+                    strokeWidth="2.5"
+                    strokeDasharray="4 2"
+                    markerEnd="url(#arrowhead-hint)"
+                  />
+                );
+              })}
               {arrows.map((arr, i) => {
                 const p1 = getSquareCenter(arr.from);
                 const p2 = getSquareCenter(arr.to);
                 return (
                   <line
-                    key={i}
+                    key={`user-${i}`}
                     x1={`${p1.x}%`}
                     y1={`${p1.y}%`}
                     x2={`${p2.x}%`}
