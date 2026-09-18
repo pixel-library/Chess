@@ -53,6 +53,7 @@ export const Route = createFileRoute("/play")({
 function PlayPage() {
   const navigate = useNavigate();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [name, setName] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [recent, setRecent] = useState<RecentGame[]>([]);
@@ -86,10 +87,12 @@ function PlayPage() {
         return [];
       }
     },
+    enabled: mounted,
     refetchInterval: 5000,
   });
 
   useEffect(() => {
+    setMounted(true);
     const stored = getPlayerName();
     setSessionId(getSessionId());
     setRecent(getRecentGames());
@@ -182,6 +185,17 @@ function PlayPage() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <main className="mx-auto flex max-w-md flex-col justify-center px-4 py-20 text-center">
+          <p className="eyebrow text-muted-foreground animate-pulse">Loading lobby…</p>
+        </main>
+      </div>
+    );
   }
 
   if (!nameLocked) {
