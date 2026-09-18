@@ -667,5 +667,15 @@ export const getPublicRooms = createServerFn({ method: "GET" }).handler(async ()
     .order("created_at", { ascending: false })
     .limit(20);
   if (error) throw new Error(error.message);
-  return data ?? [];
+
+  return (data ?? []).filter((room) => {
+    const host = (room.white_name || room.black_name || "").toLowerCase();
+    const code = (room.code || "").toLowerCase();
+    return (
+      !host.includes("testuser") &&
+      !host.includes("test user") &&
+      !host.includes("test_user") &&
+      !code.includes("test")
+    );
+  });
 });

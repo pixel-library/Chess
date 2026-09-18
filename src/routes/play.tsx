@@ -332,7 +332,18 @@ function PlayPage() {
                   </p>
                 </div>
               )}
-              {publicRoomsQuery.data?.map((room) => {
+              {publicRoomsQuery.data
+                ?.filter((room) => {
+                  const name = (room.white_name || room.black_name || "").toLowerCase();
+                  const code = (room.code || "").toLowerCase();
+                  return (
+                    !name.includes("testuser") &&
+                    !name.includes("test user") &&
+                    !name.includes("test_user") &&
+                    !code.includes("test")
+                  );
+                })
+                .map((room) => {
                 const hostName = room.white_name || room.black_name || "Host";
                 const hostSide = room.white_name ? "White" : "Black";
                 return (
