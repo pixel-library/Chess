@@ -3,6 +3,7 @@ import { ArrowRight, Bot, ShieldCheck, Sparkles, Users, Zap, Crown } from "lucid
 
 import { ChessBoard } from "@/components/ChessBoard";
 import { ChessPiece } from "@/components/ChessPieces";
+import { HeroChessArtwork } from "@/components/HeroChessArtwork";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 
@@ -95,7 +96,7 @@ function Landing() {
               Master the board.
               <br />
               <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
-                Make your move.
+                Pure Strategy.
               </span>
             </h1>
 
@@ -139,42 +140,60 @@ function Landing() {
             </div>
           </div>
 
-          {/* Interactive Demo Board Widget */}
-          <div className="relative mx-auto w-full max-w-md lg:max-w-none z-10">
-            <div
-              className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-amber-400/10 to-transparent blur-2xl"
-              aria-hidden
-            />
-            <div className="relative glass-card overflow-hidden p-2.5 sm:p-3 shadow-2xl border-amber-500/20">
-              <div className="mb-2.5 flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse" />
-                  <span className="font-editorial text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-                    Interactive 3D Stage Preview
+          {/* Hero Showcase: Interactive 3D Board & Image 2 Split Queen Artwork */}
+          <div className="relative mx-auto grid w-full max-w-md lg:max-w-none gap-6 grid-cols-1 lg:grid-cols-1 z-10">
+            <div className="relative">
+              <div
+                className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-amber-500/25 via-amber-400/10 to-transparent blur-2xl"
+                aria-hidden
+              />
+              <div className="relative glass-card overflow-hidden p-2.5 sm:p-3.5 shadow-2xl border-amber-500/20">
+                <div className="mb-2.5 flex items-center justify-between px-2">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse" />
+                    <span className="font-editorial text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                      Interactive 3D Stage (Move Mouse to Tilt)
+                    </span>
+                  </div>
+                  <span className="text-[0.65rem] font-mono font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
+                    Giuoco Piano
                   </span>
                 </div>
-                <span className="text-[0.65rem] font-mono font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
-                  Giuoco Piano
-                </span>
+                <ChessBoard fen={INITIAL_DEMO_FEN} interactive={true} showCoordinates={true} />
               </div>
-              <ChessBoard fen={INITIAL_DEMO_FEN} interactive={true} showCoordinates={true} />
             </div>
           </div>
         </section>
 
-        {/* Image 3 Inspired Bold Editorial Typography Marquee Banner */}
-        <section className="relative overflow-hidden bg-gradient-to-r from-neutral-950 via-amber-950/40 to-neutral-950 py-10 border-y border-amber-500/20 shadow-2xl">
-          <div className="flex items-center justify-between gap-8 whitespace-nowrap animate-pulse">
-            <div className="flex items-center gap-12 mx-auto text-amber-400/80 font-editorial font-black text-2xl sm:text-4xl uppercase tracking-[0.25em]">
-              <span className="flex items-center gap-3">
-                <Crown className="h-7 w-7 text-amber-400" /> MAKE YOUR MOVE
+        {/* Image 2 Inspired Gallery Artwork Section */}
+        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center rounded-3xl border border-amber-500/20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 p-6 sm:p-10 shadow-2xl overflow-hidden relative">
+            <div className="lg:col-span-7 z-10 space-y-4">
+              <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-bold text-amber-400">
+                <Sparkles className="h-3.5 w-3.5" /> Obsidian & Gold Geometric Theme
               </span>
-              <span className="opacity-30">❖</span>
-              <span>MASTER THE BOARD</span>
-              <span className="opacity-30">❖</span>
-              <span>GEOMETRIC LUXE</span>
-              <span className="opacity-30">❖</span>
-              <span>STOCKFISH 16 AI</span>
+              <h2 className="font-editorial text-3xl sm:text-5xl font-black text-foreground leading-tight">
+                Designed like fine art. Engineered for competitive speed.
+              </h2>
+              <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-xl">
+                Every piece, square, and animation has been custom vectorized for high visual
+                clarity. Experience the split dual-tone gold and obsidian palette with realistic
+                piece drop shadows.
+              </p>
+              <div className="pt-2 flex flex-wrap gap-3 text-xs font-mono font-bold text-amber-300">
+                <span className="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg">
+                  Geometric Facets
+                </span>
+                <span className="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg">
+                  Stage Lighting
+                </span>
+                <span className="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg">
+                  Web Audio Soundscapes
+                </span>
+              </div>
+            </div>
+            <div className="lg:col-span-5 z-10 max-w-xs mx-auto lg:max-w-none w-full">
+              <HeroChessArtwork />
             </div>
           </div>
         </section>

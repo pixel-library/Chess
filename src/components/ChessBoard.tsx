@@ -53,7 +53,26 @@ export function ChessBoard({
   const [selected, setSelected] = useState<string | null>(null);
   const [premove, setPremove] = useState<BoardMove | null>(null);
   const [pending, setPending] = useState<BoardMove | null>(null);
-  const [is3D, setIs3D] = useState<boolean>(false);
+  const [is3D, setIs3D] = useState<boolean>(true);
+  const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 26, y: 0 });
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (!is3D || !boardRef.current) return;
+    const rect = boardRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const rotateX = 26 - ((e.clientY - centerY) / (rect.height / 2)) * 10;
+    const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * 10;
+    setTilt({
+      x: Math.max(12, Math.min(40, rotateX)),
+      y: Math.max(-18, Math.min(18, rotateY)),
+    });
+  }
+
+  function handleMouseLeave() {
+    if (is3D) setTilt({ x: 26, y: 0 });
+  }
 
   // Board Annotations (Right-click highlights & arrows)
   const [highlightedSquares, setHighlightedSquares] = useState<Set<string>>(new Set());
@@ -356,20 +375,17 @@ export function ChessBoard({
   return (
     <div className="flex flex-col items-center gap-3 w-full">
       <div
+        ref={boardRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         className={cn(
-          "relative w-full aspect-square transition-all duration-500 board-container-3d-perspective",
+          "relative w-full aspect-square transition-all duration-500 board-container-3d-perspective cursor-pointer",
           isShuddering && "animate-board-shudder",
         )}
         data-board-theme={settings.boardTheme}
       >
-        {/* Image 3 Inspired Editorial Banner Overlay */}
-        {canMoveNow && !chess.isGameOver() && (
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-amber-400/40 bg-amber-400/15 text-amber-300 font-editorial text-[0.68rem] font-extrabold uppercase tracking-widest backdrop-blur-md shadow-lg shadow-amber-500/20 animate-pulse">
-              <Sparkles className="h-3 w-3" /> Make Your Move
-            </span>
-          </div>
-        )}
+        {/* Reflective Dark Stage Floor Layer (Image 1 Inspiration) */}
+        {is3D && <div className="stage-reflective-floor" aria-hidden />}
 
         {kingInCheck && !chess.isCheckmate() && (
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
@@ -389,9 +405,12 @@ export function ChessBoard({
 
         <div
           className={cn(
-            "h-full w-full rounded-2xl bg-board-frame p-2 shadow-plate sm:p-3 transition-transform duration-500",
+            "h-full w-full rounded-2xl bg-board-frame p-2 shadow-plate sm:p-3 transition-transform duration-150 ease-out",
             is3D && "board-3d-tilt",
           )}
+          style={{
+            transform: is3D ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(0.92)` : "none",
+          }}
         >
           <div
             className="relative grid grid-cols-8 aspect-square h-full w-full overflow-hidden rounded-lg"
