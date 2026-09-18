@@ -1,9 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-export type BoardTheme = "classic" | "wood" | "emerald" | "midnight" | "cyberpunk" | "slate";
-export type PieceStyle = "staunton" | "neo" | "glyph";
+export type BoardTheme =
+  "obsidian" | "classic" | "wood" | "emerald" | "midnight" | "cyberpunk" | "slate";
+export type PieceStyle = "geometric" | "staunton" | "neo" | "glyph";
 
 export const BOARD_THEMES: { id: BoardTheme; label: string }[] = [
+  { id: "obsidian", label: "Obsidian Gold" },
   { id: "classic", label: "Classic Green" },
   { id: "wood", label: "Warm Wood" },
   { id: "emerald", label: "Deep Emerald" },
@@ -27,8 +29,8 @@ export type Settings = {
 };
 
 export const DEFAULT_SETTINGS: Settings = {
-  boardTheme: "classic",
-  pieceStyle: "glyph",
+  boardTheme: "obsidian",
+  pieceStyle: "geometric",
   coordinates: true,
   sounds: true,
   volume: 0.5,

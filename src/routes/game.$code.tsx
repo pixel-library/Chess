@@ -817,7 +817,10 @@ function GamePage() {
 
           <div className="paper flex flex-col p-4">
             <p className="eyebrow text-muted-foreground">Chat</p>
-            <div ref={chatScrollRef} className="mt-3 max-h-52 min-h-24 flex-1 space-y-2 overflow-y-auto text-sm">
+            <div
+              ref={chatScrollRef}
+              className="mt-3 max-h-52 min-h-24 flex-1 space-y-2 overflow-y-auto text-sm"
+            >
               {messages.length === 0 && (
                 <p className="text-muted-foreground">Say hello. Keep it friendly.</p>
               )}
@@ -836,10 +839,12 @@ function GamePage() {
                   const body = draft.trim();
                   if (!body || !game) return;
                   setDraft("");
-                  
+
                   const senderName =
-                    (creds.color === "w" ? game.white_name : game.black_name) || getPlayerName() || "Player";
-                  
+                    (creds.color === "w" ? game.white_name : game.black_name) ||
+                    getPlayerName() ||
+                    "Player";
+
                   const newMsg: ChatRow = {
                     id: "temp-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7),
                     sender_name: senderName,

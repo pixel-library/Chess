@@ -12,11 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TIME_CONTROLS } from "@/lib/chess-shared";
-import {
-  createGame,
-  getPublicRooms,
-  joinGame,
-} from "@/lib/chess.functions";
+import { createGame, getPublicRooms, joinGame } from "@/lib/chess.functions";
 import {
   getPlayerName,
   getRecentGames,
@@ -287,7 +283,12 @@ function PlayPage() {
                   Rated (session rating)
                 </Label>
               </div>
-              <Button size="lg" disabled={busy} onClick={handleCreate} className="font-bold w-full sm:w-auto">
+              <Button
+                size="lg"
+                disabled={busy}
+                onClick={handleCreate}
+                className="font-bold w-full sm:w-auto"
+              >
                 {isPublic ? "Create Public Room" : "Create Private Room"}
               </Button>
             </div>
@@ -335,7 +336,10 @@ function PlayPage() {
                 const hostName = room.white_name || room.black_name || "Host";
                 const hostSide = room.white_name ? "White" : "Black";
                 return (
-                  <div key={room.code} className="glass-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 sm:p-4">
+                  <div
+                    key={room.code}
+                    className="glass-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 sm:p-4"
+                  >
                     <div className="flex items-center gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent/20 font-display text-base font-bold text-accent">
                         {hostSide === "White" ? "♔" : "♚"}

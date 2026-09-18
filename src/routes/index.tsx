@@ -1,7 +1,8 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, Bot, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
+import { ArrowRight, Bot, ShieldCheck, Sparkles, Users, Zap, Crown } from "lucide-react";
 
 import { ChessBoard } from "@/components/ChessBoard";
+import { ChessPiece } from "@/components/ChessPieces";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 
@@ -48,8 +49,8 @@ const FEATURES = [
   },
   {
     icon: Sparkles,
-    title: "Pro Themes & Audio",
-    body: "6 wooden & neon board themes, Staunton/Neo piece styles, and crisp Web Audio sound cues.",
+    title: "Pro Themes & 3D Stage",
+    body: "Obsidian Gold stage lighting, 3D tilt perspective mode, and Geometric Luxe piece styles.",
   },
   {
     icon: ShieldCheck,
@@ -66,27 +67,42 @@ function Landing() {
       <SiteHeader />
 
       <main>
-        {/* Hero Section */}
+        {/* Hero Section with Floating 3D Chess Pieces (Image 4 Inspiration) */}
         <section className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 sm:gap-12 sm:px-6 sm:py-16 lg:grid-cols-[1.1fr_1fr] lg:py-24">
+          {/* Floating 3D Physics Background Elements (Image 4) */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30 sm:opacity-50">
+            <div className="absolute -top-6 left-10 h-24 w-24 animate-float-slow filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]">
+              <ChessPiece type="k" color="b" style="geometric" />
+            </div>
+            <div className="absolute top-1/3 left-1/2 h-20 w-20 animate-float-delayed filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]">
+              <ChessPiece type="q" color="w" style="geometric" />
+            </div>
+            <div className="absolute bottom-10 left-1/4 h-16 w-16 animate-float-reverse filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]">
+              <ChessPiece type="n" color="b" style="geometric" />
+            </div>
+            <div className="absolute top-12 right-12 h-20 w-20 animate-float-slow filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]">
+              <ChessPiece type="r" color="w" style="geometric" />
+            </div>
+          </div>
+
           <div className="relative z-10">
             <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-bold text-accent shadow-sm">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>Next-Gen Web Chess UI</span>
+              <span>Obsidian Gold & 3D Stage</span>
             </div>
 
-            <h1 className="display-xl mt-5 text-[clamp(2.1rem,7.5vw,4.8rem)] font-extrabold tracking-tight">
+            <h1 className="font-editorial mt-5 text-[clamp(2.3rem,8vw,5.2rem)] font-black tracking-tight leading-[0.95] text-foreground">
               Master the board.
               <br />
-              <span className="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-200 bg-clip-text text-transparent">
-                No accounts.
+              <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
+                Make your move.
               </span>
-              <br />
-              Instant play.
             </h1>
 
-            <p className="mt-5 max-w-lg text-sm text-muted-foreground sm:text-lg leading-relaxed">
-              Experience browser chess engineered for clarity and performance. Play live matches
-              with friends, train against Stockfish, and analyze positions in real-time.
+            <p className="mt-5 max-w-lg text-sm text-muted-foreground sm:text-lg leading-relaxed font-sans">
+              Experience browser chess engineered for luxury and performance. Tilted 3D stage
+              lighting, geometric gold pieces, live stockfish evaluation, and sub-millisecond
+              multiplayer.
             </p>
 
             {/* Quick Action Cards */}
@@ -94,7 +110,7 @@ function Landing() {
               <Button
                 asChild
                 size="lg"
-                className="w-full sm:w-auto gap-2 font-bold shadow-lg shadow-amber-500/20"
+                className="w-full sm:w-auto gap-2 font-bold bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-xl shadow-amber-500/25 transition-all hover:scale-105"
               >
                 <Link to="/play">
                   <Users className="h-4 w-4" /> Play Online Now <ArrowRight className="h-4 w-4" />
@@ -104,7 +120,7 @@ function Landing() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto gap-2 font-bold"
+                className="w-full sm:w-auto gap-2 font-bold border-amber-500/30 hover:border-amber-500/60"
               >
                 <Link to="/computer">
                   <Bot className="h-4 w-4" /> Vs Stockfish AI
@@ -124,24 +140,41 @@ function Landing() {
           </div>
 
           {/* Interactive Demo Board Widget */}
-          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+          <div className="relative mx-auto w-full max-w-md lg:max-w-none z-10">
             <div
-              className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-emerald-500/10 to-transparent blur-2xl"
+              className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-amber-400/10 to-transparent blur-2xl"
               aria-hidden
             />
-            <div className="relative glass-card overflow-hidden p-2.5 sm:p-3 shadow-2xl">
+            <div className="relative glass-card overflow-hidden p-2.5 sm:p-3 shadow-2xl border-amber-500/20">
               <div className="mb-2.5 flex items-center justify-between px-2">
                 <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="font-display text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Interactive Preview
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="font-editorial text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                    Interactive 3D Stage Preview
                   </span>
                 </div>
-                <span className="text-[0.65rem] font-mono font-bold text-accent bg-accent/10 px-2 py-0.5 rounded">
+                <span className="text-[0.65rem] font-mono font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
                   Giuoco Piano
                 </span>
               </div>
               <ChessBoard fen={INITIAL_DEMO_FEN} interactive={true} showCoordinates={true} />
+            </div>
+          </div>
+        </section>
+
+        {/* Image 3 Inspired Bold Editorial Typography Marquee Banner */}
+        <section className="relative overflow-hidden bg-gradient-to-r from-neutral-950 via-amber-950/40 to-neutral-950 py-10 border-y border-amber-500/20 shadow-2xl">
+          <div className="flex items-center justify-between gap-8 whitespace-nowrap animate-pulse">
+            <div className="flex items-center gap-12 mx-auto text-amber-400/80 font-editorial font-black text-2xl sm:text-4xl uppercase tracking-[0.25em]">
+              <span className="flex items-center gap-3">
+                <Crown className="h-7 w-7 text-amber-400" /> MAKE YOUR MOVE
+              </span>
+              <span className="opacity-30">❖</span>
+              <span>MASTER THE BOARD</span>
+              <span className="opacity-30">❖</span>
+              <span>GEOMETRIC LUXE</span>
+              <span className="opacity-30">❖</span>
+              <span>STOCKFISH 16 AI</span>
             </div>
           </div>
         </section>

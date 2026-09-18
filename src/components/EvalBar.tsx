@@ -59,11 +59,11 @@ export function EvalBar({ evaluation, turn = "w", orientation = "w", className =
       title={`Evaluation: ${label}`}
     >
       {/* Black Section */}
-      <div className="w-full flex-1 bg-slate-950 transition-all duration-300" />
+      <div className="w-full flex-1 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 transition-all duration-300" />
 
-      {/* White Section */}
+      {/* White Section (Gold/Amber Glow) */}
       <div
-        className="w-full bg-slate-100 transition-all duration-300"
+        className="w-full bg-gradient-to-t from-amber-400 via-amber-300 to-amber-100 transition-all duration-300 shadow-[0_0_15px_rgba(245,158,11,0.5)]"
         style={{
           height: isFlipped ? `${100 - whitePercentage}%` : whiteBarHeight,
         }}
@@ -72,14 +72,14 @@ export function EvalBar({ evaluation, turn = "w", orientation = "w", className =
       {/* Numerical Label Badge */}
       <div
         className={cn(
-          "absolute left-1/2 -translate-x-1/2 rounded px-1 text-[0.65rem] font-bold tracking-tight shadow-sm transition-all",
+          "absolute left-1/2 -translate-x-1/2 rounded px-1.5 py-0.5 font-mono text-[0.65rem] font-black tracking-tight shadow-md transition-all border border-amber-500/20",
           whitePercentage > 50
             ? isFlipped
-              ? "top-1 bg-slate-100 text-slate-900"
-              : "bottom-1 bg-slate-100 text-slate-900"
+              ? "top-1 bg-amber-400 text-amber-950"
+              : "bottom-1 bg-amber-400 text-amber-950"
             : isFlipped
-              ? "bottom-1 bg-slate-900 text-slate-100"
-              : "top-1 bg-slate-900 text-slate-100",
+              ? "bottom-1 bg-slate-900 text-amber-300"
+              : "top-1 bg-slate-900 text-amber-300",
         )}
       >
         {label}

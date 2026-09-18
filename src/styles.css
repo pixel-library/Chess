@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700&family=Manrope:wght@400;500;600;700&family=Outfit:wght@500;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -11,6 +12,7 @@
 
 @theme inline {
   --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-editorial: "Cinzel", "Playfair Display", Georgia, serif;
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
@@ -111,6 +113,12 @@
   --input: oklch(1 0 0 / 15%);
   --ink: oklch(0.1 0.01 260);
   --ink-foreground: oklch(0.97 0.008 85);
+}
+
+[data-board-theme="obsidian"] {
+  --board-light: oklch(0.84 0.13 78);
+  --board-dark: oklch(0.16 0.02 255);
+  --board-frame: oklch(0.09 0.015 255);
 }
 
 [data-board-theme="wood"] {
@@ -326,6 +334,94 @@
   }
   75% {
     transform: translate(-1px, 2px);
+  }
+}
+
+@utility font-editorial {
+  font-family: var(--font-editorial);
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+@utility font-mono {
+  font-family: var(--font-mono);
+}
+
+@utility display-editorial {
+  font-family: var(--font-editorial);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+
+/* 3D Perspective & Stage Lighting (Image 1 Inspiration) */
+.board-container-3d-perspective {
+  perspective: 1200px;
+  perspective-origin: 50% 65%;
+}
+
+.board-3d-tilt {
+  transform: rotateX(28deg) rotateZ(0deg) scale(0.92);
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 40px 80px -20px rgba(0, 0, 0, 0.9),
+    0 0 60px -10px oklch(0.79 0.14 78 / 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.board-3d-tilt:hover {
+  transform: rotateX(24deg) rotateZ(0deg) scale(0.94);
+}
+
+.board-3d-tile {
+  transform-style: preserve-3d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.stage-spotlight {
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(250, 204, 21, 0.05) 35%,
+    transparent 75%
+  );
+  pointer-events: none;
+}
+
+/* Floating 3D Physics Keyframes (Image 4 Inspiration) */
+@utility animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+@utility animate-float-delayed {
+  animation: float-slow 9s ease-in-out infinite 2s;
+}
+
+@utility animate-float-reverse {
+  animation: float-reverse 8s ease-in-out infinite 1s;
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(-16px) rotate(4deg) scale(1.03);
+  }
+}
+
+@keyframes float-reverse {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(14px) rotate(-5deg) scale(0.97);
   }
 }
 

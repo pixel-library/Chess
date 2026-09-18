@@ -2,7 +2,7 @@ import React from "react";
 
 export type PieceType = "k" | "q" | "r" | "b" | "n" | "p";
 export type PieceColor = "w" | "b";
-export type PieceStyle = "staunton" | "neo" | "glyph";
+export type PieceStyle = "geometric" | "staunton" | "neo" | "glyph";
 
 type PieceProps = {
   type: PieceType;
@@ -21,11 +21,11 @@ const GLYPHS: Record<string, string> = {
 };
 
 /**
- * Staunton, Neo Vector SVG & Classic Glyph Chess Pieces
+ * Geometric Art (Gold/Obsidian), Staunton, Neo Vector SVG & Classic Glyph Chess Pieces
  */
 import { cn } from "@/lib/utils";
 
-export function ChessPiece({ type, color, style = "staunton", className = "" }: PieceProps) {
+export function ChessPiece({ type, color, style = "geometric", className = "" }: PieceProps) {
   if (style === "glyph") {
     return (
       <span
@@ -43,6 +43,21 @@ export function ChessPiece({ type, color, style = "staunton", className = "" }: 
   }
 
   const isWhite = color === "w";
+
+  if (style === "geometric") {
+    return (
+      <svg
+        viewBox="0 0 45 45"
+        className={cn(
+          "pointer-events-none h-full w-full select-none drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)] transition-all duration-150 ease-out will-change-transform",
+          className,
+        )}
+      >
+        {renderGeometricPiece(type, isWhite)}
+      </svg>
+    );
+  }
+
   const fillColor = isWhite ? "#F9FAFB" : "#1F2937";
   const strokeColor = isWhite ? "#374151" : "#F3F4F6";
   const accentColor = isWhite ? "#D1D5DB" : "#111827";
@@ -237,6 +252,136 @@ function renderNeoPiece(type: PieceType, isWhite: boolean) {
             strokeLinecap="round"
           />
           <rect x="12" y="32" width="21" height="5" rx="2" />
+        </g>
+      );
+  }
+}
+
+function renderGeometricPiece(type: PieceType, isWhite: boolean) {
+  // Image 2 Inspired Faceted Dual-Tone Gold (White) & Obsidian (Black) Palette
+  const lightFacet = isWhite ? "#FDE047" : "#64748B";
+  const midFacet = isWhite ? "#F59E0B" : "#1E293B";
+  const shadowFacet = isWhite ? "#D97706" : "#0F172A";
+  const stroke = isWhite ? "#451A03" : "#F59E0B";
+  const glowCenter = isWhite ? "#FEF08A" : "#94A3B8";
+
+  switch (type) {
+    case "p":
+      return (
+        <g stroke={stroke} strokeWidth="1.2" strokeLinejoin="bevel">
+          {/* Head Sphere Facets */}
+          <polygon points="22.5,7 16,14 22.5,17" fill={lightFacet} />
+          <polygon points="22.5,7 22.5,17 29,14" fill={midFacet} />
+          <polygon points="16,14 22.5,17 22.5,21 17,19" fill={shadowFacet} />
+          <polygon points="29,14 28,19 22.5,21 22.5,17" fill={midFacet} />
+
+          {/* Pyramid Gown Facets */}
+          <polygon points="22.5,21 16,33 22.5,33" fill={lightFacet} />
+          <polygon points="22.5,21 22.5,33 29,33" fill={midFacet} />
+
+          {/* Pedestal Base */}
+          <polygon points="13,33 22.5,33 22.5,37 11,37" fill={shadowFacet} />
+          <polygon points="22.5,33 32,33 34,37 22.5,37" fill={midFacet} />
+        </g>
+      );
+    case "r":
+      return (
+        <g stroke={stroke} strokeWidth="1.2" strokeLinejoin="bevel">
+          {/* Battlements */}
+          <polygon points="11,10 16,10 16,14 11,14" fill={lightFacet} />
+          <polygon points="18,10 27,10 27,14 18,14" fill={glowCenter} />
+          <polygon points="29,10 34,10 34,14 29,14" fill={midFacet} />
+
+          {/* Tower Shaft Facets */}
+          <polygon points="13,14 22.5,14 22.5,32 15,32" fill={lightFacet} />
+          <polygon points="22.5,14 32,14 30,32 22.5,32" fill={midFacet} />
+
+          {/* Base Tier */}
+          <polygon points="11,32 22.5,32 22.5,37 9,37" fill={shadowFacet} />
+          <polygon points="22.5,32 34,32 36,37 22.5,37" fill={midFacet} />
+        </g>
+      );
+    case "n":
+      return (
+        <g stroke={stroke} strokeWidth="1.2" strokeLinejoin="bevel">
+          {/* Angular Horse Head Facets */}
+          <polygon points="20,8 28,14 22.5,18 14,14" fill={lightFacet} />
+          <polygon points="28,14 35,21 27,24 22.5,18" fill={midFacet} />
+          <polygon points="14,14 22.5,18 20,29 12,28" fill={shadowFacet} />
+          <polygon points="22.5,18 27,24 22.5,32 20,29" fill={glowCenter} />
+
+          {/* Mane Polygon */}
+          <polygon points="20,8 14,14 11,24 16,20" fill={midFacet} />
+
+          {/* Base */}
+          <polygon points="11,32 22.5,32 22.5,37 9,37" fill={shadowFacet} />
+          <polygon points="22.5,32 34,32 36,37 22.5,37" fill={midFacet} />
+        </g>
+      );
+    case "b":
+      return (
+        <g stroke={stroke} strokeWidth="1.2" strokeLinejoin="bevel">
+          {/* Top Orb */}
+          <polygon points="22.5,6 20,9 22.5,11 25,9" fill={glowCenter} />
+
+          {/* Mitre Facets with Cutout */}
+          <polygon points="22.5,11 14,20 22.5,24" fill={lightFacet} />
+          <polygon points="22.5,11 22.5,24 31,20" fill={midFacet} />
+          <polygon points="14,20 22.5,24 22.5,32 16,32" fill={shadowFacet} />
+          <polygon points="31,20 29,32 22.5,32 22.5,24" fill={midFacet} />
+
+          {/* Cross Slash Facet Cutout */}
+          <polygon points="20,16 26,19 22.5,21" fill={stroke} />
+
+          {/* Base */}
+          <polygon points="12,32 22.5,32 22.5,37 10,37" fill={shadowFacet} />
+          <polygon points="22.5,32 33,32 35,37 22.5,37" fill={midFacet} />
+        </g>
+      );
+    case "q":
+      return (
+        // Image 2 Queen Direct Inspiration
+        <g stroke={stroke} strokeWidth="1.2" strokeLinejoin="bevel">
+          {/* Crown Spikes */}
+          <polygon points="9,14 15,22 13,11" fill={lightFacet} />
+          <polygon points="15,22 22.5,8 18,22" fill={glowCenter} />
+          <polygon points="22.5,8 30,22 27,11" fill={midFacet} />
+          <polygon points="30,22 36,14 32,24" fill={shadowFacet} />
+
+          {/* Central Orb */}
+          <polygon points="22.5,8 20,12 22.5,15 25,12" fill={glowCenter} />
+
+          {/* Upper Body Facets */}
+          <polygon points="15,22 22.5,15 22.5,27 16,27" fill={lightFacet} />
+          <polygon points="22.5,15 30,22 29,27 22.5,27" fill={midFacet} />
+
+          {/* Split Gown Facets */}
+          <polygon points="16,27 22.5,27 22.5,34 12,34" fill={shadowFacet} />
+          <polygon points="22.5,27 29,27 33,34 22.5,34" fill={midFacet} />
+
+          {/* Base */}
+          <polygon points="10,34 22.5,34 22.5,38 8,38" fill={shadowFacet} />
+          <polygon points="22.5,34 35,34 37,38 22.5,38" fill={midFacet} />
+        </g>
+      );
+    case "k":
+      return (
+        <g stroke={stroke} strokeWidth="1.2" strokeLinejoin="bevel">
+          {/* Top Cross Facet */}
+          <polygon points="22.5,5 20,8 22.5,11 25,8" fill={glowCenter} />
+          <polygon points="18,8 27,8 22.5,11" fill={lightFacet} />
+
+          {/* King Crown Mantle */}
+          <polygon points="22.5,11 14,17 22.5,22" fill={lightFacet} />
+          <polygon points="22.5,11 22.5,22 31,17" fill={midFacet} />
+
+          {/* Pillar Body */}
+          <polygon points="14,17 22.5,22 22.5,33 15,33" fill={shadowFacet} />
+          <polygon points="31,17 30,33 22.5,33 22.5,22" fill={midFacet} />
+
+          {/* Base */}
+          <polygon points="10,33 22.5,33 22.5,38 8,38" fill={shadowFacet} />
+          <polygon points="22.5,33 35,33 37,38 22.5,38" fill={midFacet} />
         </g>
       );
   }
