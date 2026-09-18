@@ -146,21 +146,6 @@ function Landing() {
           </div>
         </section>
 
-        {/* Floating 3D Tumbling Pieces Stage Section */}
-        <section className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-20 flex flex-col items-center text-center">
-          <div className="relative w-full max-w-4xl flex items-center justify-center">
-            <div
-              className="absolute -inset-8 rounded-full bg-gradient-to-tr from-amber-500/15 via-amber-400/5 to-transparent blur-3xl"
-              aria-hidden
-            />
-            <img
-              src="/assets/floating-board-transparent.png"
-              alt="Floating 3D Chessboard with Tumbling Pieces"
-              className="relative z-10 w-full max-w-3xl object-contain filter drop-shadow-[0_30px_60px_rgba(0,0,0,0.85)] animate-float-slow transition-transform hover:scale-105 duration-700 pointer-events-none select-none"
-            />
-          </div>
-        </section>
-
         {/* Feature Grid */}
         <section className="border-y border-border/80 bg-ink py-12 text-ink-foreground sm:py-24">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
