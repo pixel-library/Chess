@@ -146,36 +146,18 @@ function Landing() {
           </div>
         </section>
 
-        {/* Image 2 Inspired Gallery Artwork Section */}
-        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center rounded-3xl border border-amber-500/20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 p-6 sm:p-10 shadow-2xl overflow-hidden relative">
-            <div className="lg:col-span-7 z-10 space-y-4">
-              <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-bold text-amber-400">
-                <Sparkles className="h-3.5 w-3.5" /> Obsidian & Gold Geometric Theme
-              </span>
-              <h2 className="font-editorial text-3xl sm:text-5xl font-black text-foreground leading-tight">
-                Designed like fine art. Engineered for competitive speed.
-              </h2>
-              <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-xl">
-                Every piece, square, and animation has been custom vectorized for high visual
-                clarity. Experience the split dual-tone gold and obsidian palette with realistic
-                piece drop shadows.
-              </p>
-              <div className="pt-2 flex flex-wrap gap-3 text-xs font-mono font-bold text-amber-300">
-                <span className="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg">
-                  Geometric Facets
-                </span>
-                <span className="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg">
-                  Stage Lighting
-                </span>
-                <span className="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg">
-                  Web Audio Soundscapes
-                </span>
-              </div>
-            </div>
-            <div className="lg:col-span-5 z-10 max-w-xs mx-auto lg:max-w-none w-full">
-              <HeroChessArtwork />
-            </div>
+        {/* Floating 3D Tumbling Pieces Stage Section */}
+        <section className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-20 flex flex-col items-center text-center">
+          <div className="relative w-full max-w-4xl flex items-center justify-center">
+            <div
+              className="absolute -inset-8 rounded-full bg-gradient-to-tr from-amber-500/15 via-amber-400/5 to-transparent blur-3xl"
+              aria-hidden
+            />
+            <img
+              src="/assets/floating-board-transparent.png"
+              alt="Floating 3D Chessboard with Tumbling Pieces"
+              className="relative z-10 w-full max-w-3xl object-contain filter drop-shadow-[0_30px_60px_rgba(0,0,0,0.85)] animate-float-slow transition-transform hover:scale-105 duration-700 pointer-events-none select-none"
+            />
           </div>
         </section>
 
