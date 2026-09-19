@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, Moon, Palette, Sparkles, Sun, Volume2, VolumeX, X } from "lucide-react";
+import { ChevronDown, Menu, Moon, Palette, Sparkles, Sun, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,11 @@ const NAV = [
   { to: "/rules", label: "Rules" },
 ] as const;
 
-export function SiteHeader() {
+export interface SiteHeaderProps {
+  hidden?: boolean;
+}
+
+export function SiteHeader({ hidden = false }: SiteHeaderProps) {
   const [open, setOpen] = useState(false);
   const { settings, update } = useSettings();
   const [isDark, setIsDark] = useState(false);
@@ -46,7 +50,14 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
+    <header
+      className={cn(
+        "z-40 border-b border-border/60 backdrop-blur-md transition-all duration-300 ease-in-out group",
+        hidden
+          ? "fixed top-0 left-0 right-0 bg-background/95 shadow-xl -translate-y-full hover:translate-y-0 focus-within:translate-y-0"
+          : "sticky top-0 bg-background/80 translate-y-0",
+      )}
+    >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link to="/" className="group flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-lg font-bold text-stone-950 shadow-md transition-transform group-hover:scale-105">
@@ -185,6 +196,15 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
+        </div>
+      )}
+
+      {hidden && (
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full pointer-events-auto cursor-pointer">
+          <div className="flex items-center gap-1.5 rounded-b-xl border border-t-0 border-border/80 bg-background/90 px-3 py-0.5 text-[0.7rem] font-bold text-muted-foreground shadow-md backdrop-blur-md transition-opacity duration-200 group-hover:opacity-0">
+            <span>Navbar</span>
+            <ChevronDown className="h-3 w-3 animate-pulse" />
+          </div>
         </div>
       )}
     </header>

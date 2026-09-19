@@ -540,10 +540,11 @@ function GamePage() {
   const inviteLink =
     typeof window !== "undefined" ? `${window.location.origin}/game/${game.code}` : "";
   const topColor: "w" | "b" = orientation === "w" ? "b" : "w";
+  const isMatchActive = game.status === "active";
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
+      <SiteHeader hidden={isMatchActive} />
       <main className="mx-auto grid max-w-7xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:py-2 lg:items-start">
         <div className="flex flex-col items-center lg:items-stretch">
           <div className="w-full max-w-[min(100%,calc(100vh-190px))] xl:max-w-[620px] mx-auto">
