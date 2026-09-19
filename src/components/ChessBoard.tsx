@@ -1,6 +1,6 @@
 import { Chess, type Square } from "chess.js";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Eye, Palette, Sparkles, Volume2, VolumeX } from "lucide-react";
+import { Eye, Palette, Sparkles, Volume2, VolumeX } from "lucide-react";
 
 import { ChessPiece, type PieceType, type PieceColor } from "@/components/ChessPieces";
 import { BOARD_THEMES, PIECE_STYLES, type PieceStyle, useSettings } from "@/lib/settings";
@@ -38,6 +38,7 @@ type Props = {
   customArrows?: { from: string; to: string; color?: string }[];
   showCoordinates?: boolean;
   onMove?: (move: BoardMove) => void;
+  mode?: "3d" | "2d";
 };
 
 export function ChessBoard({
@@ -49,11 +50,12 @@ export function ChessBoard({
   customArrows = [],
   showCoordinates = true,
   onMove,
+  mode = "2d",
 }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [premove, setPremove] = useState<BoardMove | null>(null);
   const [pending, setPending] = useState<BoardMove | null>(null);
-  const [is3D, setIs3D] = useState<boolean>(true);
+  const is3D = mode === "3d";
   const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 26, y: 0 });
   const boardRef = useRef<HTMLDivElement>(null);
 
@@ -671,21 +673,6 @@ export function ChessBoard({
       {/* Integrated Board Quick Controls Bar */}
       <div className="flex items-center justify-between w-full max-w-full px-3 py-1.5 rounded-xl border border-border/60 bg-card/60 backdrop-blur-md text-xs text-muted-foreground shadow-sm">
         <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setIs3D(!is3D)}
-            className={cn(
-              "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium transition-all",
-              is3D
-                ? "bg-amber-500 text-amber-950 font-bold shadow-sm shadow-amber-500/30"
-                : "hover:bg-accent hover:text-foreground",
-            )}
-            title="Toggle 3D Stage Angle"
-          >
-            <Box className="h-3.5 w-3.5" />
-            <span>3D Angle</span>
-          </button>
-
           <button
             type="button"
             onClick={() => {

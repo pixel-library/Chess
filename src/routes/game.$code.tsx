@@ -576,6 +576,7 @@ function GamePage() {
               )}
               <div className="flex-1">
                 <ChessBoard
+                  mode="2d"
                   fen={displayFen}
                   orientation={orientation}
                   myColor={creds?.color ?? null}

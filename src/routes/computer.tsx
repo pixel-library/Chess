@@ -208,6 +208,7 @@ function ComputerPage() {
               {/* Main Chessboard */}
               <div className="flex-1">
                 <ChessBoard
+                  mode="2d"
                   fen={fen}
                   orientation={myColor}
                   myColor={myColor}

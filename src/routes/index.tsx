@@ -134,7 +134,7 @@ function Landing() {
 
           {/* Hero Showcase: Clean Transparent 3D Chessboard */}
           <div className="relative mx-auto w-full max-w-md lg:max-w-none z-10">
-            <ChessBoard fen={INITIAL_DEMO_FEN} interactive={true} showCoordinates={true} />
+            <ChessBoard mode="3d" fen={INITIAL_DEMO_FEN} interactive={true} showCoordinates={true} />
           </div>
         </section>
 
