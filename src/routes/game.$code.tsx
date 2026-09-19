@@ -545,9 +545,81 @@ function GamePage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader hidden={isMatchActive} />
-      <main className="mx-auto grid max-w-7xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:py-2 lg:items-start">
-        <div className="flex flex-col items-center lg:items-stretch">
-          <div className="w-full max-w-[min(100%,calc(100vh-190px))] xl:max-w-[620px] mx-auto">
+      <main className="mx-auto grid max-w-7xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)_320px] lg:py-4 lg:items-start">
+        {/* Left Column: Move History */}
+        <aside className="order-2 space-y-4 lg:order-1">
+          <div className="paper p-4">
+            <div className="flex items-center justify-between">
+              <p className="eyebrow text-muted-foreground">Moves</p>
+              <div className="flex gap-1">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Previous move"
+                  disabled={moves.length === 0}
+                  onClick={() =>
+                    setReviewPly((p) => {
+                      const current = p ?? moves.length - 1;
+                      return Math.max(0, current - 1);
+                    })
+                  }
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Next move"
+                  disabled={moves.length === 0}
+                  onClick={() =>
+                    setReviewPly((p) => {
+                      if (p === null || p >= moves.length - 1) return null;
+                      return p + 1;
+                    })
+                  }
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="mt-3 max-h-[420px] overflow-y-auto font-mono text-sm">
+              {pairs.length === 0 && <p className="text-muted-foreground">No moves yet.</p>}
+              {pairs.map((pair) => (
+                <div key={pair.no} className="flex items-center gap-2 py-0.5">
+                  <span className="w-6 text-muted-foreground">{pair.no}.</span>
+                  {[pair.white, pair.black].map((entry, i) =>
+                    entry ? (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() =>
+                          setReviewPly(entry.ply === moves.length - 1 ? null : entry.ply)
+                        }
+                        className={cn(
+                          "w-16 rounded px-1 text-left hover:bg-secondary",
+                          reviewPly === entry.ply && "bg-accent text-accent-foreground",
+                        )}
+                      >
+                        {entry.san}
+                      </button>
+                    ) : (
+                      <span key={i} className="w-16" />
+                    ),
+                  )}
+                </div>
+              ))}
+            </div>
+            {reviewing && (
+              <Button size="sm" variant="ghost" className="mt-2 w-full" onClick={() => setReviewPly(null)}>
+                Back to live position
+              </Button>
+            )}
+          </div>
+        </aside>
+
+        {/* Center Column: Chessboard & Players */}
+        <div className="order-1 flex flex-col items-center lg:order-2">
+          <div className="mx-auto w-full max-w-[min(100%,calc(100vh-190px))] xl:max-w-[600px]">
             {/* Opening Badge */}
             {openingInfo && (
               <div className="mb-2 flex items-center justify-between px-1">
@@ -598,7 +670,7 @@ function GamePage() {
           </div>
 
           {game.status === "waiting" && (
-            <div className="paper mt-4 p-5 text-center">
+            <div className="paper mt-4 w-full max-w-[600px] p-5 text-center">
               <p className="font-display text-xl font-bold">Waiting for an opponent</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Share this code or link to start the game.
@@ -631,7 +703,7 @@ function GamePage() {
           )}
 
           {game.status === "finished" && (
-            <div className="ink-panel mt-4 p-6 text-center">
+            <div className="ink-panel mt-4 w-full max-w-[600px] p-6 text-center">
               <p className="eyebrow text-accent">Game over</p>
               <p className="mt-2 font-display text-2xl font-extrabold">
                 {resultText(game.result, game.result_reason)}
@@ -670,7 +742,8 @@ function GamePage() {
           )}
         </div>
 
-        <aside className="space-y-4">
+        {/* Right Column: Room Controls & Chat */}
+        <aside className="order-3 space-y-4 lg:order-3">
           <div className="paper p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -749,74 +822,6 @@ function GamePage() {
             )}
           </div>
 
-          <div className="paper p-4">
-            <div className="flex items-center justify-between">
-              <p className="eyebrow text-muted-foreground">Moves</p>
-              <div className="flex gap-1">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  aria-label="Previous move"
-                  disabled={moves.length === 0}
-                  onClick={() =>
-                    setReviewPly((p) => {
-                      const current = p ?? moves.length - 1;
-                      return Math.max(0, current - 1);
-                    })
-                  }
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  aria-label="Next move"
-                  disabled={moves.length === 0}
-                  onClick={() =>
-                    setReviewPly((p) => {
-                      if (p === null || p >= moves.length - 1) return null;
-                      return p + 1;
-                    })
-                  }
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="mt-3 max-h-56 overflow-y-auto font-mono text-sm">
-              {pairs.length === 0 && <p className="text-muted-foreground">No moves yet.</p>}
-              {pairs.map((pair) => (
-                <div key={pair.no} className="flex items-center gap-2 py-0.5">
-                  <span className="w-6 text-muted-foreground">{pair.no}.</span>
-                  {[pair.white, pair.black].map((entry, i) =>
-                    entry ? (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() =>
-                          setReviewPly(entry.ply === moves.length - 1 ? null : entry.ply)
-                        }
-                        className={cn(
-                          "w-16 rounded px-1 text-left hover:bg-secondary",
-                          reviewPly === entry.ply && "bg-accent text-accent-foreground",
-                        )}
-                      >
-                        {entry.san}
-                      </button>
-                    ) : (
-                      <span key={i} className="w-16" />
-                    ),
-                  )}
-                </div>
-              ))}
-            </div>
-            {reviewing && (
-              <Button size="sm" variant="ghost" className="mt-2" onClick={() => setReviewPly(null)}>
-                Back to live position
-              </Button>
-            )}
-          </div>
-
           <div className="paper flex flex-col p-4">
             <p className="eyebrow text-muted-foreground">Chat</p>
             <div
@@ -855,20 +860,17 @@ function GamePage() {
                     created_at: new Date().toISOString(),
                   };
 
-                  // 1. Optimistic local cache update (0ms UI latency for sender)
                   queryClient.setQueryData<ChatRow[]>(["game-chat", game.id], (old) => [
                     ...(old ?? []),
                     newMsg,
                   ]);
 
-                  // 2. Direct WebSocket broadcast to opponent (0ms latency for receiver)
                   channelRef.current?.send({
                     type: "broadcast",
                     event: "chat",
                     payload: newMsg,
                   });
 
-                  // 3. Persist to DB in background
                   void (async () => {
                     try {
                       await chat({ data: { code, token: creds.token, body } });

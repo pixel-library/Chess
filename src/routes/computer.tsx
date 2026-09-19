@@ -178,9 +178,27 @@ function ComputerPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader hidden={isMatchActive} />
-      <main className="mx-auto grid max-w-7xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:py-2 lg:items-start">
-        <div className="flex flex-col items-center lg:items-stretch">
-          <div className="w-full max-w-[min(100%,calc(100vh-190px))] xl:max-w-[620px] mx-auto">
+      <main className="mx-auto grid max-w-7xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)_320px] lg:py-4 lg:items-start">
+        {/* Left Column: Move History */}
+        <aside className="order-2 space-y-4 lg:order-1">
+          <div className="paper p-5">
+            <p className="eyebrow text-muted-foreground">Move History</p>
+            <div className="mt-3 max-h-[420px] overflow-y-auto font-mono text-sm">
+              {pairs.length === 0 && <p className="text-muted-foreground">No moves yet.</p>}
+              {pairs.map((pair) => (
+                <div key={pair.no} className="flex gap-3 py-0.5">
+                  <span className="w-6 text-muted-foreground">{pair.no}.</span>
+                  <span className="w-16">{pair.white}</span>
+                  <span className="w-16">{pair.black ?? ""}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        {/* Center Column: Chessboard & Players */}
+        <div className="order-1 flex flex-col items-center lg:order-2">
+          <div className="mx-auto w-full max-w-[min(100%,calc(100vh-190px))] xl:max-w-[600px]">
             {/* Opening Badge */}
             {openingInfo && (
               <div className="mb-2 flex items-center justify-between px-1">
@@ -233,7 +251,8 @@ function ComputerPage() {
           </div>
         </div>
 
-        <aside className="space-y-4">
+        {/* Right Column: Game Controls & Settings */}
+        <aside className="order-3 space-y-4 lg:order-3">
           <div className="paper p-5">
             <p className="eyebrow text-muted-foreground">Engine Strength</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
@@ -339,40 +358,6 @@ function ComputerPage() {
                   )}
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="paper p-5">
-            <p className="eyebrow text-muted-foreground">Game Controls</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button size="sm" onClick={() => newGame("w")}>
-                New as White
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => newGame("b")}>
-                New as Black
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={undo}
-                disabled={history.length < 2 || thinking}
-              >
-                Undo
-              </Button>
-            </div>
-          </div>
-
-          <div className="paper p-5">
-            <p className="eyebrow text-muted-foreground">Move History</p>
-            <div className="mt-3 max-h-56 overflow-y-auto font-mono text-sm">
-              {pairs.length === 0 && <p className="text-muted-foreground">No moves yet.</p>}
-              {pairs.map((pair) => (
-                <div key={pair.no} className="flex gap-3 py-0.5">
-                  <span className="w-6 text-muted-foreground">{pair.no}.</span>
-                  <span className="w-16">{pair.white}</span>
-                  <span className="w-16">{pair.black ?? ""}</span>
-                </div>
-              ))}
             </div>
           </div>
         </aside>

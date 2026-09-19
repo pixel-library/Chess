@@ -191,9 +191,44 @@ function AnalysisPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="mx-auto grid max-w-7xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:py-2 lg:items-start">
-        <div className="flex flex-col items-center lg:items-stretch">
-          <div className="w-full max-w-[min(100%,calc(100vh-190px))] xl:max-w-[620px] mx-auto">
+      <main className="mx-auto grid max-w-7xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)_320px] lg:py-4 lg:items-start">
+        {/* Left Column: Move History */}
+        <aside className="order-2 space-y-4 lg:order-1">
+          <div className="paper p-5">
+            <p className="eyebrow text-muted-foreground">Move History</p>
+            <div className="mt-3 max-h-[420px] overflow-y-auto font-mono text-sm">
+              {pairs.length === 0 && <p className="text-muted-foreground">No moves played yet.</p>}
+              {pairs.map((pair) => (
+                <div key={pair.no} className="flex items-center gap-2 py-0.5">
+                  <span className="w-6 text-muted-foreground">{pair.no}.</span>
+                  {[pair.white, pair.black].map((entry, i) =>
+                    entry ? (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() =>
+                          setCurrentPly(entry.ply === history.length - 1 ? null : entry.ply)
+                        }
+                        className={cn(
+                          "w-16 rounded px-1 text-left hover:bg-secondary transition-colors",
+                          currentPly === entry.ply && "bg-accent text-accent-foreground font-bold",
+                        )}
+                      >
+                        {entry.san}
+                      </button>
+                    ) : (
+                      <span key={i} className="w-16" />
+                    ),
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        {/* Center Column: Chessboard & Controls */}
+        <div className="order-1 flex flex-col items-center lg:order-2">
+          <div className="mx-auto w-full max-w-[min(100%,calc(100vh-190px))] xl:max-w-[600px]">
             {/* Opening Badge */}
             {openingInfo && (
               <div className="mb-2 flex items-center justify-between px-1">
@@ -301,40 +336,8 @@ function AnalysisPage() {
           </div>
         </div>
 
-        <aside className="space-y-4">
-          {/* Move History */}
-          <div className="paper p-5">
-            <p className="eyebrow text-muted-foreground">Move History</p>
-            <div className="mt-3 max-h-48 overflow-y-auto font-mono text-sm">
-              {pairs.length === 0 && <p className="text-muted-foreground">No moves played yet.</p>}
-              {pairs.map((pair) => (
-                <div key={pair.no} className="flex items-center gap-2 py-0.5">
-                  <span className="w-6 text-muted-foreground">{pair.no}.</span>
-                  {[pair.white, pair.black].map((entry, i) =>
-                    entry ? (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() =>
-                          setCurrentPly(entry.ply === history.length - 1 ? null : entry.ply)
-                        }
-                        className={cn(
-                          "w-16 rounded px-1 text-left hover:bg-secondary transition-colors",
-                          currentPly === entry.ply && "bg-accent text-accent-foreground font-bold",
-                        )}
-                      >
-                        {entry.san}
-                      </button>
-                    ) : (
-                      <span key={i} className="w-16" />
-                    ),
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Import / Export Controls */}
+        {/* Right Column: FEN / PGN Importer */}
+        <aside className="order-3 space-y-4 lg:order-3">
           <div className="paper space-y-4 p-5">
             <div>
               <p className="eyebrow text-muted-foreground">Load FEN String</p>
