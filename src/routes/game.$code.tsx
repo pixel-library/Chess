@@ -544,9 +544,9 @@ function GamePage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="mx-auto grid max-w-6xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:py-3 lg:items-start">
+      <main className="mx-auto grid max-w-7xl gap-4 px-3 py-2 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:py-3 lg:items-start">
         <div className="flex flex-col items-center lg:items-stretch">
-          <div className="w-full max-w-[min(100%,calc(100vh-165px))] mx-auto">
+          <div className="w-full max-w-[min(100%,calc(100vh-120px))] xl:max-w-[720px] mx-auto">
             {/* Opening Badge */}
             {openingInfo && (
               <div className="mb-2 flex items-center justify-between px-1">

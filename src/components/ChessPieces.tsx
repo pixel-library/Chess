@@ -2,7 +2,7 @@ import React from "react";
 
 export type PieceType = "k" | "q" | "r" | "b" | "n" | "p";
 export type PieceColor = "w" | "b";
-export type PieceStyle = "geometric" | "staunton" | "neo" | "glyph";
+export type PieceStyle = "geometric" | "glyph";
 
 type PieceProps = {
   type: PieceType;

@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 export type BoardTheme =
-  "obsidian" | "classic" | "wood" | "emerald" | "midnight" | "cyberpunk" | "slate";
-export type PieceStyle = "geometric" | "staunton" | "neo" | "glyph";
+  "obsidian" | "classic" | "wood" | "emerald" | "midnight" | "slate";
+export type PieceStyle = "geometric" | "glyph";
 
 export const BOARD_THEMES: { id: BoardTheme; label: string }[] = [
   { id: "obsidian", label: "Obsidian Gold" },
@@ -10,14 +10,11 @@ export const BOARD_THEMES: { id: BoardTheme; label: string }[] = [
   { id: "wood", label: "Warm Wood" },
   { id: "emerald", label: "Deep Emerald" },
   { id: "midnight", label: "Midnight Blue" },
-  { id: "cyberpunk", label: "Cyber Neon" },
   { id: "slate", label: "Slate Grey" },
 ];
 
 export const PIECE_STYLES: { id: PieceStyle; label: string }[] = [
   { id: "geometric", label: "Geometric Luxe" },
-  { id: "staunton", label: "Staunton Vector" },
-  { id: "neo", label: "Neo Vector" },
   { id: "glyph", label: "Classic Glyph" },
 ];
 

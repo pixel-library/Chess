@@ -545,13 +545,14 @@ export function ChessBoard({
                 return (
                   <div
                     key={p.id}
-                    className="absolute p-1 pointer-events-none transition-all ease-out will-change-transform flex items-center justify-center"
+                    className="absolute p-1 pointer-events-none transition-all will-change-transform flex items-center justify-center"
                     style={{
                       left: `${p.col * 12.5}%`,
                       top: `${p.row * 12.5}%`,
                       width: "12.5%",
                       height: "12.5%",
                       transitionDuration: `${animDurationMs}ms`,
+                      transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
                       transitionProperty: animDurationMs > 0 ? "top, left, transform" : "none",
                     }}
                   >
