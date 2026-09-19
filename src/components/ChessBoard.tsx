@@ -1,9 +1,8 @@
 import { Chess, type Square } from "chess.js";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Eye, Palette, Sparkles, Volume2, VolumeX } from "lucide-react";
 
 import { ChessPiece, type PieceType, type PieceColor } from "@/components/ChessPieces";
-import { BOARD_THEMES, PIECE_STYLES, type PieceStyle, useSettings } from "@/lib/settings";
+import { useSettings } from "@/lib/settings";
 import { playMoveSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 
@@ -669,54 +668,6 @@ export function ChessBoard({
             </div>
           </div>
         )}
-      </div>
-
-      {/* Integrated Board Quick Controls Bar */}
-      <div className="flex items-center justify-between w-full max-w-full px-3 py-1.5 rounded-xl border border-border/60 bg-card/60 backdrop-blur-md text-xs text-muted-foreground shadow-sm">
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => {
-              const currentIdx = PIECE_STYLES.findIndex((p) => p.id === settings.pieceStyle);
-              const nextStyle = PIECE_STYLES[(currentIdx + 1) % PIECE_STYLES.length]!;
-              updateSettings({ pieceStyle: nextStyle.id });
-            }}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-accent hover:text-foreground font-medium transition-all"
-            title="Switch Piece Style (Geometric, Staunton, Neo, Glyph)"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span className="capitalize">{settings.pieceStyle}</span>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => {
-              const currentIdx = BOARD_THEMES.findIndex((t) => t.id === settings.boardTheme);
-              const nextTheme = BOARD_THEMES[(currentIdx + 1) % BOARD_THEMES.length]!;
-              updateSettings({ boardTheme: nextTheme.id });
-            }}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-accent hover:text-foreground font-medium transition-all"
-            title="Cycle Board Theme"
-          >
-            <Palette className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline capitalize">{settings.boardTheme}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => updateSettings({ sounds: !settings.sounds })}
-            className="inline-flex items-center justify-center h-7 w-7 rounded-lg hover:bg-accent hover:text-foreground transition-all"
-            title="Toggle Sound"
-          >
-            {settings.sounds ? (
-              <Volume2 className="h-3.5 w-3.5" />
-            ) : (
-              <VolumeX className="h-3.5 w-3.5 text-muted-foreground/60" />
-            )}
-          </button>
-        </div>
       </div>
     </div>
   );
